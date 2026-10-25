@@ -73,12 +73,14 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
   const [showAppleMenu, setShowAppleMenu] = useState(false);
   const [showControlCenter, setShowControlCenter] = useState(false);
   const [showSpotlight, setShowSpotlight] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState(85);
   const [spotlightQuery, setSpotlightQuery] = useState('');
   const appleMenuRef = useRef<HTMLDivElement>(null);
   const controlCenterRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
 
   const [wifi, setWifi] = useState(true);
   const [bluetooth, setBluetooth] = useState(true);
@@ -152,6 +154,9 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
       if (spotlightRef.current && !spotlightRef.current.contains(e.target as Node)) {
         setShowSpotlight(false);
       }
+      if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
+        setShowCalendar(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -174,8 +179,41 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
     return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   };
 
+  const formatTimeWithSeconds = (d: Date) => {
+    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  };
+
   const formatDate = (d: Date) => {
     return d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
+  };
+
+  const generateCalendar = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const today = date.getDate();
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    
+    const days = [];
+    // Empty cells for days before first day of month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+    // Days of month
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(i);
+    }
+    
+    return {
+      monthName: monthNames[month],
+      year,
+      days,
+      today
+    };
   };
 
   const handleAppleMenuClick = (action: string) => {
@@ -551,10 +589,86 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
             {isFullscreen ? <Icons.fullscreenExit /> : <Icons.fullscreen />}
           </button>
 
-          {/* Date & Time */}
-          <span className="text-sm ml-2" style={{ color: 'var(--text-primary)' }}>
-            {formatDate(time)} {formatTime(time)}
-          </span>
+          {/* Date & Time with Calendar */}
+          <div className="relative" ref={calendarRef}>
+            <button
+              className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-white/10 transition-colors text-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowCalendar(!showCalendar);
+                setShowAppleMenu(false);
+                setShowControlCenter(false);
+                setShowSpotlight(false);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowCalendar(!showCalendar);
+                setShowAppleMenu(false);
+                setShowControlCenter(false);
+                setShowSpotlight(false);
+              }}
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {formatDate(time)} {formatTime(time)}
+            </button>
+
+            {showCalendar && (
+              <div
+                className="absolute top-8 right-0 liquid-glass-heavy rounded-xl p-4 w-80 shadow-2xl"
+                style={{ 
+                  zIndex: 9999,
+                  background: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(40px) saturate(200%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(200%)'
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                {/* Current Time with Seconds */}
+                <div className="text-center mb-4">
+                  <div className="text-3xl font-light mb-1" style={{ color: 'var(--text-primary)' }}>
+                    {formatTimeWithSeconds(time)}
+                  </div>
+                  <div className="text-sm opacity-60" style={{ color: 'var(--text-primary)' }}>
+                    {time.toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </div>
+                </div>
+
+                {/* Calendar */}
+                {(() => {
+                  const cal = generateCalendar(time);
+                  const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+                  
+                  return (
+                    <div>
+                      <div className="text-center font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
+                        {cal.monthName} {cal.year}
+                      </div>
+                      <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                        {weekDays.map(day => (
+                          <div key={day} className="py-1 opacity-60 font-medium" style={{ color: 'var(--text-primary)' }}>
+                            {day}
+                          </div>
+                        ))}
+                        {cal.days.map((day, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`py-1 rounded ${day === cal.today ? 'bg-blue-500 text-white font-semibold' : ''}`}
+                            style={{ 
+                              color: day === cal.today ? 'white' : 'var(--text-primary)',
+                              opacity: day ? 1 : 0
+                            }}
+                          >
+                            {day || ''}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
