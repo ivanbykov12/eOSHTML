@@ -202,7 +202,7 @@ export default function WindowManager({
           )}
 
           {/* Content */}
-          <div className="flex-1 overflow-hidden relative" style={{ background: win.app && isV11(win.app) ? win.app.background : 'transparent' }}>
+          <div className="window-content flex-1 overflow-hidden relative" style={{ background: win.app && isV11(win.app) && win.app.background !== 'transparent' ? win.app.background : undefined }}>
             {win.app ? (
               <AppRenderer
                 app={win.app}

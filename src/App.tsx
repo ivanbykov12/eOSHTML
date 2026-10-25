@@ -99,6 +99,27 @@ export default function App() {
           iframe.contentWindow.postMessage({ type: 'eos-console-result', result }, '*');
         }
       }
+      
+      // Handle app installation from App Store
+      if (e.data?.type === 'eapp-install-from-file') {
+        const { app } = e.data;
+        if (app && app.id && app.name) {
+          // Add to installed apps
+          setInstalledApps(prev => {
+            // Check if already installed
+            if (prev.find(a => a.id === app.id)) {
+              return prev;
+            }
+            return [...prev, {
+              id: app.id,
+              name: app.name,
+              icon: app.icon || 'material:apps',
+              color: app.color || 'from-gray-500 to-gray-700',
+              app: app
+            }];
+          });
+        }
+      }
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
@@ -250,7 +271,11 @@ export default function App() {
       />
 
       {/* Menu Bar */}
-      <MenuBar activeWindowTitle={activeWindowTitle} isDark={isDark} />
+      <MenuBar 
+        activeWindowTitle={activeWindowTitle} 
+        isDark={isDark} 
+        onOpenApp={openApp} 
+      />
 
       {/* Desktop */}
       <Desktop

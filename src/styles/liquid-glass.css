@@ -58,6 +58,7 @@ body {
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
 }
 
 .eos-window.minimized {
@@ -68,6 +69,16 @@ body {
 
 .eos-window.opening {
   animation: windowOpen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Window content - solid background for readability */
+.window-content {
+  background: rgba(30, 30, 30, 0.95);
+}
+
+.light .window-content,
+:not(.dark) .window-content {
+  background: rgba(255, 255, 255, 0.95);
 }
 
 @keyframes windowOpen {

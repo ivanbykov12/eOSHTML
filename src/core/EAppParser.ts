@@ -76,6 +76,7 @@ const SYSTEM_APP_FILES = [
   'finder.eapp',
   'appstore.eapp',
   'calculator.eapp',
+  'about.eapp',
 ];
 
 /**
