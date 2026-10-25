@@ -68,3 +68,44 @@ export function getIconName(icon: string): string {
   }
   return icon;
 }
+
+// System app registry - loaded from public/apps/system/*.eapp
+const SYSTEM_APP_FILES = [
+  'settings.eapp',
+  'terminal.eapp',
+  'finder.eapp',
+  'appstore.eapp',
+  'calculator.eapp',
+];
+
+/**
+ * Loads all system .eapp files from /apps/system/ directory
+ * and registers them as installed system applications.
+ */
+export async function loadSystemApps(): Promise<EApp[]> {
+  const apps: EApp[] = [];
+  
+  for (const filename of SYSTEM_APP_FILES) {
+    try {
+      const response = await fetch(`/apps/system/${filename}`);
+      if (!response.ok) {
+        console.warn(`Failed to load system app: ${filename}`);
+        continue;
+      }
+      const json = await response.text();
+      const app = parseEApp(json);
+      apps.push(app);
+    } catch (error) {
+      console.error(`Error loading ${filename}:`, error);
+    }
+  }
+  
+  return apps;
+}
+
+/**
+ * Returns the list of system app filenames that should be loaded at startup.
+ */
+export function getSystemAppFiles(): string[] {
+  return [...SYSTEM_APP_FILES];
+}

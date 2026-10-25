@@ -5,17 +5,9 @@ import WindowManager, { WindowState } from './components/WindowManager/WindowMan
 import MenuBar from './components/MenuBar/MenuBar';
 import Dock from './components/Dock/Dock';
 import MissionControl from './components/WindowManager/MissionControl';
-import { settingsApp } from './components/Apps/SettingsApp';
-import { terminalApp } from './components/Apps/TerminalApp';
-import { finderApp } from './components/Apps/FinderApp';
-import { appStoreApp } from './components/Apps/AppStoreApp';
-import { calculatorApp } from './components/Apps/CalculatorApp';
-import { EApp } from './core/EAppParser';
+import { EApp, loadSystemApps } from './core/EAppParser';
 import { loadSettings, saveSettings } from './core/API';
 import './styles/liquid-glass.css';
-
-// System apps registry
-const SYSTEM_APPS: EApp[] = [settingsApp, terminalApp, finderApp, appStoreApp, calculatorApp];
 
 interface InstalledApp {
   id: string;
@@ -33,8 +25,9 @@ export default function App() {
   const [showMissionControl, setShowMissionControl] = useState(false);
   const [installedApps, setInstalledApps] = useState<InstalledApp[]>([]);
   const [brightness, setBrightness] = useState(100);
+  const [systemAppsLoaded, setSystemAppsLoaded] = useState(false);
 
-  // Initialize
+  // Initialize - load settings and system apps
   useEffect(() => {
     const settings = loadSettings();
     const isSetup = localStorage.getItem('eos_setup_complete') === 'true';
@@ -47,15 +40,21 @@ export default function App() {
       setBrightness(settings.brightness);
     }
 
-    // Install system apps
-    const apps: InstalledApp[] = SYSTEM_APPS.map(app => ({
-      id: app.id,
-      name: app.name,
-      icon: app.icon,
-      color: app.color,
-      app,
-    }));
-    setInstalledApps(apps);
+    // Load system .eapp files from /apps/system/
+    loadSystemApps().then(apps => {
+      const installed: InstalledApp[] = apps.map(app => ({
+        id: app.id,
+        name: app.name,
+        icon: app.icon,
+        color: app.color,
+        app,
+      }));
+      setInstalledApps(installed);
+      setSystemAppsLoaded(true);
+    }).catch(err => {
+      console.error('Failed to load system apps:', err);
+      setSystemAppsLoaded(true);
+    });
   }, []);
 
   // Apply dark mode
@@ -67,17 +66,37 @@ export default function App() {
     }
   }, [isDark]);
 
-  // Listen for settings changes from apps
+  // Listen for settings changes from apps (via postMessage from iframes)
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === 'eos-settings') {
-        const newSettings = e.data.data;
+        const newSettings = e.data.data || e.data;
         saveSettings(newSettings);
         if (newSettings.darkMode !== undefined) {
           setIsDark(newSettings.darkMode);
         }
         if (newSettings.brightness !== undefined) {
           setBrightness(newSettings.brightness);
+        }
+      }
+      // Console command responses
+      if (e.data?.type === 'eos-console') {
+        const { command } = e.data;
+        // Handle console commands from iframes
+        let result = '';
+        const cmd = command.trim().toLowerCase();
+        if (cmd === 'model') result = 'Macbook 13 Pro\nModel: eosdesktop';
+        else if (cmd === 'sysinfo') result = 'eOS Desktop 10.1 beta\nKernel: eOS-Darwin 23.0\nModel: Macbook 13 Pro\nRBAC: SYSTEM_ADMIN';
+        else if (cmd === 'ls') result = '📁 Desktop\n📁 Documents\n📁 Downloads';
+        else if (cmd === 'whoami') result = loadSettings().name || 'ivan';
+        else if (cmd === 'uptime') result = `up ${Math.floor(performance.now() / 1000)} seconds`;
+        else if (cmd === 'help') result = 'Available commands: model, sysinfo, ls, uptime, whoami, help';
+        else result = `Command not found: ${command}`;
+        
+        // Send result back to iframe
+        const iframe = document.querySelector('iframe');
+        if (iframe?.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'eos-console-result', result }, '*');
         }
       }
     };
@@ -88,12 +107,10 @@ export default function App() {
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // F3 or Ctrl+Up for Mission Control
       if (e.key === 'F3' || (e.ctrlKey && e.key === 'ArrowUp')) {
         e.preventDefault();
         setShowMissionControl(prev => !prev);
       }
-      // Cmd+W to close window
       if ((e.metaKey || e.ctrlKey) && e.key === 'w') {
         e.preventDefault();
         if (activeWindowId) {
@@ -101,7 +118,6 @@ export default function App() {
           setActiveWindowId(null);
         }
       }
-      // Cmd+M to minimize
       if ((e.metaKey || e.ctrlKey) && e.key === 'm') {
         e.preventDefault();
         if (activeWindowId) {
@@ -114,9 +130,8 @@ export default function App() {
   }, [activeWindowId]);
 
   const openApp = useCallback((appId: string, appName?: string) => {
-    // Find app
-    const appData = SYSTEM_APPS.find(a => a.id === appId);
-    if (!appData && !appName) return;
+    const appData = installedApps.find(a => a.id === appId);
+    if (!appData?.app && !appName) return;
 
     const windowId = `win_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
     const maxZ = Math.max(...windows.map(w => w.zIndex), 0);
@@ -132,12 +147,12 @@ export default function App() {
       minimized: false,
       maximized: false,
       zIndex: maxZ + 1,
-      app: appData,
+      app: appData?.app,
     };
 
     setWindows(prev => [...prev, newWindow]);
     setActiveWindowId(windowId);
-  }, [windows]);
+  }, [windows, installedApps]);
 
   const handleOOBEComplete = useCallback((settings: any) => {
     saveSettings({
@@ -152,10 +167,8 @@ export default function App() {
   }, []);
 
   const handleDockClick = useCallback((appId: string) => {
-    // Check if already open
     const existing = windows.find(w => w.appId === appId);
     if (existing) {
-      // Focus or restore
       const maxZ = Math.max(...windows.map(w => w.zIndex), 0);
       setWindows(prev => prev.map(w => 
         w.id === existing.id ? { ...w, minimized: false, zIndex: maxZ + 1 } : w
@@ -175,10 +188,8 @@ export default function App() {
     setShowMissionControl(false);
   }, [windows]);
 
-  // Get active window title for menu bar
   const activeWindowTitle = windows.find(w => w.id === activeWindowId)?.title || null;
 
-  // Dock apps
   const dockApps = installedApps.map(a => ({
     id: a.id,
     name: a.name,
@@ -191,6 +202,20 @@ export default function App() {
   // OOBE Screen
   if (!setupComplete) {
     return <OOBE onComplete={handleOOBEComplete} />;
+  }
+
+  // Loading state while system apps are loading
+  if (!systemAppsLoaded) {
+    return (
+      <div className="fixed inset-0 bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center animate-pulse">
+            <span className="material-icons text-white text-3xl">computer</span>
+          </div>
+          <p className="text-white/60 text-sm">Загрузка системы...</p>
+        </div>
+      </div>
+    );
   }
 
   // Main Desktop
