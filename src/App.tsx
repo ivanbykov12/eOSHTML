@@ -5,6 +5,7 @@ import WindowManager, { WindowState } from './components/WindowManager/WindowMan
 import MenuBar from './components/MenuBar/MenuBar';
 import Dock from './components/Dock/Dock';
 import MissionControl from './components/WindowManager/MissionControl';
+import Launchpad from './components/Launchpad/Launchpad';
 import { EApp, loadSystemApps } from './core/EAppParser';
 import { loadSettings, saveSettings } from './core/API';
 import './styles/liquid-glass.css';
@@ -23,6 +24,7 @@ export default function App() {
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
   const [showMissionControl, setShowMissionControl] = useState(false);
+  const [showLaunchpad, setShowLaunchpad] = useState(false);
   const [installedApps, setInstalledApps] = useState<InstalledApp[]>([]);
   const [brightness, setBrightness] = useState(100);
   const [wallpaper, setWallpaper] = useState('https://image.qwenlm.ai/generated-images/5e8ac870-af53-4f3f-a451-4014bb9cce09/_result.png');
@@ -271,6 +273,10 @@ export default function App() {
         e.preventDefault();
         setShowMissionControl(prev => !prev);
       }
+      if (e.key === 'F4') {
+        e.preventDefault();
+        setShowLaunchpad(prev => !prev);
+      }
       if ((e.metaKey || e.ctrlKey) && e.key === 'w') {
         e.preventDefault();
         if (activeWindowId) {
@@ -415,11 +421,21 @@ export default function App() {
         />
       )}
 
+      {/* Launchpad */}
+      {showLaunchpad && (
+        <Launchpad
+          apps={dockApps}
+          onAppClick={handleDockClick}
+          onClose={() => setShowLaunchpad(false)}
+        />
+      )}
+
       {/* Dock */}
       <Dock
         apps={dockApps}
         openAppIds={openAppIds}
         onAppClick={handleDockClick}
+        onLaunchpadClick={() => setShowLaunchpad(true)}
       />
     </div>
   );

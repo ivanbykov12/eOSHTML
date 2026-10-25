@@ -5,9 +5,10 @@ interface DockProps {
   apps: { id: string; name: string; icon: string; color: string }[];
   openAppIds: string[];
   onAppClick: (appId: string) => void;
+  onLaunchpadClick?: () => void;
 }
 
-export default function Dock({ apps, openAppIds, onAppClick }: DockProps) {
+export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick }: DockProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [touchActive, setTouchActive] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
@@ -96,6 +97,35 @@ export default function Dock({ apps, openAppIds, onAppClick }: DockProps) {
             </div>
           );
         })}
+
+        {/* Separator */}
+        <div className="w-px h-10 bg-white/20 mx-1 self-center" />
+
+        {/* Launchpad */}
+        <div
+          className="dock-item relative flex flex-col items-center cursor-pointer"
+          style={{
+            transform: hoveredIndex === apps.length + 2 ? 'translateY(-16px) scale(1.4)' : 'scale(1)',
+            transformOrigin: 'bottom center',
+            transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          onMouseEnter={() => setHoveredIndex(apps.length + 2)}
+          onClick={onLaunchpadClick}
+        >
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center shadow-lg">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+              <circle cx="5" cy="5" r="2"/>
+              <circle cx="12" cy="5" r="2"/>
+              <circle cx="19" cy="5" r="2"/>
+              <circle cx="5" cy="12" r="2"/>
+              <circle cx="12" cy="12" r="2"/>
+              <circle cx="19" cy="12" r="2"/>
+              <circle cx="5" cy="19" r="2"/>
+              <circle cx="12" cy="19" r="2"/>
+              <circle cx="19" cy="19" r="2"/>
+            </svg>
+          </div>
+        </div>
 
         {/* Separator */}
         <div className="w-px h-10 bg-white/20 mx-1 self-center" />

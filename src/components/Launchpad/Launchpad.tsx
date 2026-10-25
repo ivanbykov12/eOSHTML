@@ -1,0 +1,129 @@
+import { useState, useEffect } from 'react';
+
+interface LaunchpadProps {
+  apps: { id: string; name: string; icon: string; color: string }[];
+  onAppClick: (appId: string) => void;
+  onClose: () => void;
+}
+
+export default function Launchpad({ apps, onAppClick, onClose }: LaunchpadProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const appsPerPage = 35; // 7x5 grid
+
+  const filteredApps = apps.filter(app => 
+    app.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredApps.length / appsPerPage);
+  const currentApps = filteredApps.slice(
+    currentPage * appsPerPage,
+    (currentPage + 1) * appsPerPage
+  );
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  const getIconName = (icon: string) => {
+    if (icon.startsWith('material:')) {
+      return icon.replace('material:', '');
+    }
+    return icon;
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 z-[8500] flex flex-col items-center justify-center"
+      style={{
+        background: 'rgba(0, 0, 0, 0.4)',
+        backdropFilter: 'blur(30px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+      }}
+      onClick={onClose}
+    >
+      {/* Search Bar */}
+      <div className="w-full max-w-md mb-8 px-4">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Поиск"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(0);
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full px-4 py-2 pl-10 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 outline-none focus:border-white/40 transition-all"
+            autoFocus
+          />
+          <svg 
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" 
+            fill="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+        </div>
+      </div>
+
+      {/* Apps Grid */}
+      <div className="flex-1 w-full max-w-6xl px-8 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="grid grid-cols-7 gap-6 justify-items-center">
+          {currentApps.map(app => (
+            <div
+              key={app.id}
+              className="flex flex-col items-center cursor-pointer group"
+              onClick={() => {
+                onAppClick(app.id);
+                onClose();
+              }}
+            >
+              <div 
+                className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg mb-2 transition-transform group-hover:scale-110`}
+              >
+                <span className="material-icons text-white text-3xl">
+                  {getIconName(app.icon)}
+                </span>
+              </div>
+              <span className="text-white text-xs text-center font-medium drop-shadow-lg">
+                {app.name}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {currentApps.length === 0 && (
+          <div className="text-center text-white/50 mt-20">
+            <span className="material-icons text-6xl mb-4 block">search_off</span>
+            <p>Ничего не найдено</p>
+          </div>
+        )}
+      </div>
+
+      {/* Page Indicators */}
+      {totalPages > 1 && (
+        <div className="flex gap-2 mt-8 mb-4">
+          {Array.from({ length: totalPages }).map((_, idx) => (
+            <button
+              key={idx}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === currentPage ? 'bg-white' : 'bg-white/30'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentPage(idx);
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

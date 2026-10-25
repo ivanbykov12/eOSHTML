@@ -83,6 +83,9 @@ const SYSTEM_APP_FILES = [
   'textedit.eapp',
   'sysmonitor.eapp',
   'weather.eapp',
+  'calendar.eapp',
+  'photos.eapp',
+  'music.eapp',
 ];
 
 /**
