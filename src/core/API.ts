@@ -12,6 +12,9 @@ export interface EPhoneSettings {
   language?: string;
   region?: string;
   wallpaper?: string;
+  touchMode?: boolean;
+  buttonSize?: 'small' | 'medium' | 'large';
+  fontSize?: number;
 }
 
 export interface EPhoneContext {
@@ -129,6 +132,12 @@ export function injectAPI(iframe: HTMLIFrameElement): void {
 }
 
 export function getAPIScript(): string {
+  const settings = getSettings();
+  const isDark = settings.darkMode !== false;
+  const touchMode = settings.touchMode === true;
+  const buttonSize = settings.buttonSize || 'medium';
+  const fontSize = settings.fontSize || 14;
+  
   return `
     <script>
       if (!window.ePhone) {
@@ -138,14 +147,18 @@ export function getAPIScript(): string {
           checkPermission: function(r, a) { return true; },
           getDevice: function() { return 'Macbook 13 Pro'; },
           getRBACLevel: function() { return '${rbac.getLevel()}'; },
-          getSettings: function() { return ${JSON.stringify(getSettings())}; },
+          getSettings: function() { return ${JSON.stringify(settings)}; },
           setSettings: function(s) { window.parent.postMessage({type:'eos-settings', data:s}, '*'); }
         };
         window.ePhoneContext = {
           modelName: 'Macbook 13 Pro',
           model: 'eosdesktop',
           isDesktop: true,
-          osVersion: '10.1 beta'
+          osVersion: '10.1 beta',
+          isDark: ${isDark},
+          touchMode: ${touchMode},
+          buttonSize: '${buttonSize}',
+          fontSize: ${fontSize}
         };
         window.ePhoneConsole = {
           execute: function(cmd) {
@@ -160,7 +173,65 @@ export function getAPIScript(): string {
             });
           }
         };
+        
+        // Apply theme
+        (function() {
+          var isDark = ${isDark};
+          var touchMode = ${touchMode};
+          var buttonSize = '${buttonSize}';
+          var fontSize = ${fontSize};
+          
+          if (isDark) {
+            document.body.classList.add('dark');
+            document.documentElement.classList.add('dark');
+          } else {
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+          }
+          
+          if (touchMode) {
+            document.body.classList.add('touch-mode');
+          }
+          
+          // Set button size
+          var sizeMap = { small: '32px', medium: '40px', large: '48px' };
+          document.documentElement.style.setProperty('--button-size', sizeMap[buttonSize] || '40px');
+          document.documentElement.style.setProperty('--font-size', fontSize + 'px');
+        })();
       }
     </script>
+    <style>
+      :root {
+        --bg-primary: ${isDark ? '#1e1e1e' : '#ffffff'};
+        --bg-secondary: ${isDark ? '#2a2a2a' : '#f5f5f7'};
+        --bg-tertiary: ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'};
+        --text-primary: ${isDark ? '#f5f5f7' : '#1d1d1f'};
+        --text-secondary: ${isDark ? 'rgba(245,245,247,0.6)' : 'rgba(29,29,31,0.6)'};
+        --border-color: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'};
+        --button-size: ${buttonSize === 'small' ? '32px' : buttonSize === 'large' ? '48px' : '40px'};
+        --font-size: ${fontSize}px;
+      }
+      
+      body {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: var(--font-size);
+      }
+      
+      .touch-mode button,
+      .touch-mode .btn,
+      .touch-mode [role="button"] {
+        min-height: var(--button-size);
+        min-width: var(--button-size);
+        padding: 8px 16px;
+      }
+      
+      .touch-mode input,
+      .touch-mode select,
+      .touch-mode textarea {
+        font-size: 16px;
+        min-height: 44px;
+      }
+    </style>
   `;
 }

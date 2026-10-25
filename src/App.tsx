@@ -97,6 +97,31 @@ export default function App() {
     }
   }, [isDark]);
 
+  const openApp = useCallback((appId: string, appName?: string) => {
+    const appData = installedApps.find(a => a.id === appId);
+    if (!appData?.app && !appName) return;
+
+    const windowId = `win_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+    const maxZ = Math.max(...windows.map(w => w.zIndex), 0);
+
+    const newWindow: WindowState = {
+      id: windowId,
+      appId,
+      title: appName || appData?.name || 'Application',
+      x: 100 + (windows.length * 30) % 200,
+      y: 60 + (windows.length * 30) % 150,
+      width: 800,
+      height: 550,
+      minimized: false,
+      maximized: false,
+      zIndex: maxZ + 1,
+      app: appData?.app,
+    };
+
+    setWindows(prev => [...prev, newWindow]);
+    setActiveWindowId(windowId);
+  }, [windows, installedApps]);
+
   // Listen for settings changes from apps (via postMessage from iframes)
   useEffect(() => {
     const handler = (e: MessageEvent) => {
@@ -159,10 +184,47 @@ export default function App() {
           setWallpaper(wallpaper);
         }
       }
+      
+      // Handle open app request (from settings to open Epple ID)
+      if (e.data?.type === 'eos-open-app') {
+        const { appId } = e.data;
+        if (appId) {
+          openApp(appId);
+        }
+      }
+      
+      // Handle settings change (need to update all windows)
+      if (e.data?.type === 'eos-settings-change') {
+        const changes = e.data;
+        saveSettings(changes);
+        
+        if (changes.darkMode !== undefined) {
+          setIsDark(changes.darkMode);
+        }
+        if (changes.brightness !== undefined) {
+          setBrightness(changes.brightness);
+        }
+        
+        // Notify all windows about theme change
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach(iframe => {
+          try {
+            iframe.contentWindow?.postMessage({
+              type: 'eos-theme-change',
+              isDark: changes.darkMode !== undefined ? changes.darkMode : isDark,
+              touchMode: changes.touchMode,
+              buttonSize: changes.buttonSize,
+              fontSize: changes.fontSize
+            }, '*');
+          } catch (err) {
+            // Ignore cross-origin errors
+          }
+        });
+      }
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, []);
+  }, [isDark, openApp]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -188,31 +250,6 @@ export default function App() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [activeWindowId]);
-
-  const openApp = useCallback((appId: string, appName?: string) => {
-    const appData = installedApps.find(a => a.id === appId);
-    if (!appData?.app && !appName) return;
-
-    const windowId = `win_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-    const maxZ = Math.max(...windows.map(w => w.zIndex), 0);
-
-    const newWindow: WindowState = {
-      id: windowId,
-      appId,
-      title: appName || appData?.name || 'Application',
-      x: 100 + (windows.length * 30) % 200,
-      y: 60 + (windows.length * 30) % 150,
-      width: 800,
-      height: 550,
-      minimized: false,
-      maximized: false,
-      zIndex: maxZ + 1,
-      app: appData?.app,
-    };
-
-    setWindows(prev => [...prev, newWindow]);
-    setActiveWindowId(windowId);
-  }, [windows, installedApps]);
 
   const handleOOBEComplete = useCallback((settings: any) => {
     saveSettings({

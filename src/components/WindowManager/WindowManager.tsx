@@ -378,6 +378,54 @@ function AppRenderer({ app, windowId, onMessage }: { app: EApp; windowId: string
         doc.open();
         doc.write(html);
         doc.close();
+        
+        // Listen for theme changes
+        const themeHandler = (e: MessageEvent) => {
+          if (e.data?.type === 'eos-theme-change') {
+            // Reload iframe to apply new theme
+            if (iframeRef.current) {
+              const newDoc = iframeRef.current.contentDocument;
+              if (newDoc) {
+                const newApiScript = getAPIScript();
+                const newHtml = `
+                  <!DOCTYPE html>
+                  <html>
+                  <head>
+                    <meta charset="utf-8">
+                    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+                    <style>
+                      * { box-sizing: border-box; margin: 0; padding: 0; }
+                      body { 
+                        font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; 
+                        overflow: auto; 
+                        height: 100vh;
+                        color: ${e.data.isDark ? '#f5f5f7' : '#1d1d1f'};
+                        background: transparent;
+                      }
+                      .liquid-glass {
+                        background: ${e.data.isDark ? 'rgba(30,30,30,0.65)' : 'rgba(255,255,255,0.65)'};
+                        backdrop-filter: blur(24px) saturate(180%);
+                        -webkit-backdrop-filter: blur(24px) saturate(180%);
+                        border: 1px solid ${e.data.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.3)'};
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    ${app.code}
+                    ${newApiScript}
+                  </body>
+                  </html>
+                `;
+                newDoc.open();
+                newDoc.write(newHtml);
+                newDoc.close();
+              }
+            }
+          }
+        };
+        
+        window.addEventListener('message', themeHandler);
+        return () => window.removeEventListener('message', themeHandler);
       }
     }
   }, [app, windowId]);
