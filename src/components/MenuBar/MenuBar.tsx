@@ -192,7 +192,9 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
     const month = date.getMonth();
     const today = date.getDate();
     
-    const firstDay = new Date(year, month, 1).getDay();
+    const firstDayOfWeek = new Date(year, month, 1).getDay();
+    // Convert Sunday=0 to 6, Monday=1 to 0, etc. (week starts on Monday)
+    const firstDay = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
     const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
