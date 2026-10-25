@@ -54,6 +54,7 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
       onDragOver={handleDragOver}
       onClick={() => { setSelectedIcon(null); setContextMenu(null); }}
       onContextMenu={(e) => handleContextMenu(e)}
+      onTouchStart={() => { setContextMenu(null); }}
     >
       {/* Desktop Icons Grid */}
       <div className="flex flex-col flex-wrap gap-2 h-full content-start">
@@ -66,6 +67,18 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
             }`}
             onClick={(e) => { e.stopPropagation(); handleIconClick(app.id); }}
             onDoubleClick={() => handleIconDoubleClick(app)}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              // Double tap detection
+              const now = Date.now();
+              const lastTap = (e.currentTarget as any)._lastTap || 0;
+              if (now - lastTap < 300) {
+                handleIconDoubleClick(app);
+              } else {
+                handleIconClick(app.id);
+              }
+              (e.currentTarget as any)._lastTap = now;
+            }}
             onContextMenu={(e) => { e.stopPropagation(); handleContextMenu(e, app.id); }}
           >
             <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg mb-1`}>

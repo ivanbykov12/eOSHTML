@@ -49,6 +49,19 @@ export default function WindowManager({
     setActiveWindowId(windowId);
   }, [windows, setActiveWindowId]);
 
+  const handleTouchStart = useCallback((e: React.TouchEvent, windowId: string) => {
+    const win = windows.find(w => w.id === windowId);
+    if (!win || win.maximized) return;
+    
+    const touch = e.touches[0];
+    setDragging({
+      id: windowId,
+      offsetX: touch.clientX - win.x,
+      offsetY: touch.clientY - win.y,
+    });
+    setActiveWindowId(windowId);
+  }, [windows, setActiveWindowId]);
+
   const handleResizeStart = useCallback((e: React.MouseEvent, windowId: string) => {
     e.stopPropagation();
     const win = windows.find(w => w.id === windowId);
@@ -83,7 +96,37 @@ export default function WindowManager({
       }
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (dragging || resizing) {
+        e.preventDefault();
+      }
+      
+      if (dragging) {
+        const touch = e.touches[0];
+        setWindows(prev => prev.map(w =>
+          w.id === dragging.id
+            ? { ...w, x: touch.clientX - dragging.offsetX, y: Math.max(28, touch.clientY - dragging.offsetY) }
+            : w
+        ));
+      }
+      if (resizing) {
+        const touch = e.touches[0];
+        const dx = touch.clientX - resizing.startX;
+        const dy = touch.clientY - resizing.startY;
+        setWindows(prev => prev.map(w =>
+          w.id === resizing.id
+            ? { ...w, width: Math.max(300, resizing.startW + dx), height: Math.max(200, resizing.startH + dy) }
+            : w
+        ));
+      }
+    };
+
     const handleMouseUp = () => {
+      setDragging(null);
+      setResizing(null);
+    };
+
+    const handleTouchEnd = () => {
       setDragging(null);
       setResizing(null);
     };
@@ -91,11 +134,15 @@ export default function WindowManager({
     if (dragging || resizing) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
     }
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, [dragging, resizing, setWindows]);
 
@@ -151,6 +198,7 @@ export default function WindowManager({
           <div
             className="liquid-glass flex items-center h-10 px-3 cursor-default select-none shrink-0 rounded-t-xl"
             onMouseDown={(e) => handleMouseDown(e, win.id)}
+            onTouchStart={(e) => handleTouchStart(e, win.id)}
             onDoubleClick={() => maximizeWindow(win.id)}
           >
             {/* Traffic Lights */}
@@ -229,6 +277,19 @@ export default function WindowManager({
             <div
               className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize"
               onMouseDown={(e) => handleResizeStart(e, win.id)}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                const currentWin = windows.find(w => w.id === win.id);
+                if (!currentWin) return;
+                const touch = e.touches[0];
+                setResizing({
+                  id: currentWin.id,
+                  startX: touch.clientX,
+                  startY: touch.clientY,
+                  startW: currentWin.width,
+                  startH: currentWin.height,
+                });
+              }}
             />
           )}
         </div>

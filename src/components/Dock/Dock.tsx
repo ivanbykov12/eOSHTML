@@ -9,6 +9,7 @@ interface DockProps {
 
 export default function Dock({ apps, openAppIds, onAppClick }: DockProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [touchActive, setTouchActive] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
 
   const getScale = (index: number): number => {
@@ -35,6 +36,10 @@ export default function Dock({ apps, openAppIds, onAppClick }: DockProps) {
         ref={dockRef}
         className="liquid-glass-heavy flex items-end gap-1 px-3 py-1.5 rounded-2xl"
         onMouseLeave={() => setHoveredIndex(null)}
+        onTouchEnd={() => {
+          setTouchActive(false);
+          setHoveredIndex(null);
+        }}
       >
         {apps.map((app, index) => {
           const scale = getScale(index);
@@ -51,7 +56,24 @@ export default function Dock({ apps, openAppIds, onAppClick }: DockProps) {
                 transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
               onMouseEnter={() => setHoveredIndex(index)}
-              onClick={() => onAppClick(app.id)}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                setTouchActive(true);
+                setHoveredIndex(index);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                onAppClick(app.id);
+                setTimeout(() => {
+                  setTouchActive(false);
+                  setHoveredIndex(null);
+                }, 150);
+              }}
+              onClick={() => {
+                if (!touchActive) {
+                  onAppClick(app.id);
+                }
+              }}
             >
               {/* Tooltip */}
               {hoveredIndex === index && (

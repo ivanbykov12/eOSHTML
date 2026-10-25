@@ -215,6 +215,56 @@ body {
   background: rgba(128, 128, 128, 0.5);
 }
 
+/* Touch-friendly styles for mobile/tablet */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch targets */
+  .dock-item {
+    min-width: 56px;
+    min-height: 56px;
+  }
+  
+  .desktop-icon {
+    min-width: 80px;
+    min-height: 80px;
+    padding: 8px;
+  }
+  
+  /* Disable hover effects on touch devices */
+  .dock-item:hover {
+    transform: none !important;
+  }
+  
+  /* Larger buttons */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Smoother touch scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Prevent text selection on touch */
+.select-none {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Prevent pull-to-refresh on mobile */
+body {
+  overscroll-behavior: none;
+}
+
 /* Mission Control */
 @keyframes missionControlOpen {
   from {

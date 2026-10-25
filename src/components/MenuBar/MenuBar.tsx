@@ -91,6 +91,12 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                 setShowAppleMenu(!showAppleMenu);
                 setShowControlCenter(false);
               }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowAppleMenu(!showAppleMenu);
+                setShowControlCenter(false);
+              }}
             >
               <span className="material-icons text-sm" style={{ color: 'var(--text-primary)' }}>
                 desktop_windows
@@ -179,6 +185,12 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
             <button
               className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-white/10 transition-colors"
               onClick={(e) => {
+                e.stopPropagation();
+                setShowControlCenter(!showControlCenter);
+                setShowAppleMenu(false);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 setShowControlCenter(!showControlCenter);
                 setShowAppleMenu(false);
