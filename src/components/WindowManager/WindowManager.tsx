@@ -201,8 +201,16 @@ export default function WindowManager({
             </div>
           )}
 
-          {/* Content */}
-          <div className="window-content flex-1 overflow-hidden relative" style={{ background: win.app && isV11(win.app) && win.app.background !== 'transparent' ? win.app.background : undefined }}>
+          {/* Content - SOLID background for readability */}
+          <div 
+            className="flex-1 overflow-hidden relative" 
+            style={{ 
+              background: win.app && isV11(win.app) && win.app.background && win.app.background !== 'transparent' 
+                ? win.app.background 
+                : (document.documentElement.classList.contains('dark') ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)'),
+              color: document.documentElement.classList.contains('dark') ? '#f5f5f7' : '#1d1d1f'
+            }}
+          >
             {win.app ? (
               <AppRenderer
                 app={win.app}
@@ -210,7 +218,7 @@ export default function WindowManager({
                 onMessage={(e) => handleIframeMessage(e, win.id)}
               />
             ) : (
-              <div className="flex items-center justify-center h-full" style={{ color: 'var(--text-secondary)' }}>
+              <div className="flex items-center justify-center h-full">
                 <span>Загрузка приложения...</span>
               </div>
             )}
