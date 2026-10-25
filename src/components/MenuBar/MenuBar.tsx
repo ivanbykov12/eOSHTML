@@ -6,19 +6,86 @@ interface MenuBarProps {
   onOpenApp: (appId: string) => void;
 }
 
+// SVG Icons
+const Icons = {
+  apple: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.47-2.35 1.05-3.11z"/>
+    </svg>
+  ),
+  wifi: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
+    </svg>
+  ),
+  bluetooth: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/>
+    </svg>
+  ),
+  battery: () => (
+    <svg width="20" height="12" viewBox="0 0 25 12" fill="currentColor">
+      <rect x="1" y="1" width="20" height="10" rx="2" ry="2" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="3" y="3" width="16" height="6" rx="1" ry="1" fill="currentColor"/>
+      <rect x="22" y="4" width="2" height="4" rx="0.5" ry="0.5" fill="currentColor"/>
+    </svg>
+  ),
+  search: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+    </svg>
+  ),
+  control: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/>
+    </svg>
+  ),
+  fullscreen: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+    </svg>
+  ),
+  fullscreenExit: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+    </svg>
+  ),
+  spotlight: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+    </svg>
+  ),
+  siri: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="12" cy="12" r="4" fill="currentColor"/>
+    </svg>
+  ),
+  notification: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+    </svg>
+  )
+};
+
 export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBarProps) {
   const [time, setTime] = useState(new Date());
   const [showAppleMenu, setShowAppleMenu] = useState(false);
   const [showControlCenter, setShowControlCenter] = useState(false);
+  const [showSpotlight, setShowSpotlight] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [batteryLevel, setBatteryLevel] = useState(85);
+  const [spotlightQuery, setSpotlightQuery] = useState('');
   const appleMenuRef = useRef<HTMLDivElement>(null);
   const controlCenterRef = useRef<HTMLDivElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
 
   const [wifi, setWifi] = useState(true);
   const [bluetooth, setBluetooth] = useState(true);
   const [focusMode, setFocusMode] = useState(false);
   const [brightness, setBrightness] = useState(100);
   const [volume, setVolume] = useState(75);
+  const [airplaneMode, setAirplaneMode] = useState(false);
 
   // Track fullscreen state
   useEffect(() => {
@@ -33,6 +100,18 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
     };
+  }, []);
+
+  // Battery status
+  useEffect(() => {
+    if ('getBattery' in navigator) {
+      (navigator as any).getBattery().then((battery: any) => {
+        setBatteryLevel(Math.round(battery.level * 100));
+        battery.addEventListener('levelchange', () => {
+          setBatteryLevel(Math.round(battery.level * 100));
+        });
+      });
+    }
   }, []);
 
   const toggleFullscreen = () => {
@@ -70,10 +149,25 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
       if (controlCenterRef.current && !controlCenterRef.current.contains(e.target as Node)) {
         setShowControlCenter(false);
       }
+      if (spotlightRef.current && !spotlightRef.current.contains(e.target as Node)) {
+        setShowSpotlight(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Keyboard shortcut for Spotlight
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === ' ') {
+        e.preventDefault();
+        setShowSpotlight(prev => !prev);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const formatTime = (d: Date) => {
@@ -95,7 +189,6 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
         onOpenApp('settings_desktop');
         break;
       case 'sleep':
-        // Implement sleep mode
         console.log('Sleep mode activated');
         break;
       case 'restart':
@@ -112,14 +205,19 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
     }
   };
 
+  const handleSpotlightSearch = (query: string) => {
+    setSpotlightQuery(query);
+    // Here you could implement actual search functionality
+  };
+
   return (
     <>
       <div className="menu-bar fixed top-0 left-0 right-0 h-7 flex items-center px-3 z-[9000] select-none"
         style={{ fontSize: '13px' }}
       >
         {/* Left side */}
-        <div className="flex items-center gap-4 flex-1">
-          {/* Apple/eOS Logo */}
+        <div className="flex items-center gap-3 flex-1">
+          {/* Apple Logo */}
           <div className="relative" ref={appleMenuRef}>
             <button
               className="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-white/10 transition-colors"
@@ -127,17 +225,18 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                 e.stopPropagation();
                 setShowAppleMenu(!showAppleMenu);
                 setShowControlCenter(false);
+                setShowSpotlight(false);
               }}
               onTouchEnd={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setShowAppleMenu(!showAppleMenu);
                 setShowControlCenter(false);
+                setShowSpotlight(false);
               }}
+              style={{ color: 'var(--text-primary)' }}
             >
-              <span className="material-icons text-sm" style={{ color: 'var(--text-primary)' }}>
-                desktop_windows
-              </span>
+              <Icons.apple />
             </button>
 
             {showAppleMenu && (
@@ -207,15 +306,88 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
         {/* Right side */}
         <div className="flex items-center gap-2">
           {/* Status Icons */}
-          <span className={`material-icons text-sm ${wifi ? 'opacity-80' : 'opacity-30'}`} style={{ color: 'var(--text-primary)' }}>
-            wifi
+          {!airplaneMode && (
+            <>
+              <span 
+                className={`flex items-center ${wifi ? 'opacity-80' : 'opacity-30'}`} 
+                style={{ color: 'var(--text-primary)' }}
+                title={wifi ? 'Wi-Fi подключено' : 'Wi-Fi отключено'}
+              >
+                <Icons.wifi />
+              </span>
+              <span 
+                className={`flex items-center ${bluetooth ? 'opacity-80' : 'opacity-30'}`} 
+                style={{ color: 'var(--text-primary)' }}
+                title={bluetooth ? 'Bluetooth включен' : 'Bluetooth отключен'}
+              >
+                <Icons.bluetooth />
+              </span>
+            </>
+          )}
+
+          {/* Battery */}
+          <span 
+            className="flex items-center gap-1 opacity-80" 
+            style={{ color: 'var(--text-primary)' }}
+            title={`Батарея: ${batteryLevel}%`}
+          >
+            <Icons.battery />
+            <span className="text-xs">{batteryLevel}%</span>
           </span>
-          <span className={`material-icons text-sm ${bluetooth ? 'opacity-80' : 'opacity-30'}`} style={{ color: 'var(--text-primary)' }}>
-            bluetooth
-          </span>
-          <span className="material-icons text-sm opacity-80" style={{ color: 'var(--text-primary)' }}>
-            battery_full
-          </span>
+
+          {/* Spotlight Button */}
+          <div className="relative" ref={spotlightRef}>
+            <button
+              className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-white/10 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowSpotlight(!showSpotlight);
+                setShowAppleMenu(false);
+                setShowControlCenter(false);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowSpotlight(!showSpotlight);
+                setShowAppleMenu(false);
+                setShowControlCenter(false);
+              }}
+              title="Spotlight (Cmd+Space)"
+            >
+              <Icons.spotlight />
+            </button>
+
+            {showSpotlight && (
+              <div
+                className="absolute top-8 right-0 liquid-glass-heavy rounded-xl p-4 w-96 shadow-2xl"
+                style={{ 
+                  zIndex: 9999,
+                  background: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(40px) saturate(200%)',
+                  WebkitBackdropFilter: 'blur(40px) saturate(200%)'
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <Icons.search />
+                  <input
+                    type="text"
+                    placeholder="Поиск Spotlight"
+                    className="flex-1 bg-transparent border-none outline-none text-sm"
+                    style={{ color: 'var(--text-primary)' }}
+                    value={spotlightQuery}
+                    onChange={(e) => handleSpotlightSearch(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+                {spotlightQuery && (
+                  <div className="text-xs opacity-60" style={{ color: 'var(--text-primary)' }}>
+                    Поиск: "{spotlightQuery}"
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Control Center Button */}
           <div className="relative" ref={controlCenterRef}>
@@ -225,17 +397,18 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                 e.stopPropagation();
                 setShowControlCenter(!showControlCenter);
                 setShowAppleMenu(false);
+                setShowSpotlight(false);
               }}
               onTouchEnd={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setShowControlCenter(!showControlCenter);
                 setShowAppleMenu(false);
+                setShowSpotlight(false);
               }}
+              title="Control Center"
             >
-              <span className="material-icons text-sm" style={{ color: 'var(--text-primary)' }}>
-                tune
-              </span>
+              <Icons.control />
             </button>
 
             {/* Control Center */}
@@ -257,7 +430,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                       onClick={() => setWifi(!wifi)}
                     >
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${wifi ? 'bg-blue-500' : 'bg-gray-500'}`}>
-                        <span className="material-icons text-white text-sm">wifi</span>
+                        <Icons.wifi />
                       </div>
                       <div className="text-left">
                         <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Wi-Fi</div>
@@ -273,7 +446,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                       onClick={() => setBluetooth(!bluetooth)}
                     >
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${bluetooth ? 'bg-blue-500' : 'bg-gray-500'}`}>
-                        <span className="material-icons text-white text-sm">bluetooth</span>
+                        <Icons.bluetooth />
                       </div>
                       <div className="text-left">
                         <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Bluetooth</div>
@@ -283,6 +456,30 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                   </div>
                 </div>
 
+                {/* Airplane Mode */}
+                <div className="liquid-glass rounded-xl p-3 mb-3">
+                  <button
+                    className="flex items-center gap-3 w-full"
+                    onClick={() => {
+                      setAirplaneMode(!airplaneMode);
+                      if (!airplaneMode) {
+                        setWifi(false);
+                        setBluetooth(false);
+                      }
+                    }}
+                  >
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${airplaneMode ? 'bg-orange-500' : 'bg-gray-500'}`}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                        <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Авиарежим</div>
+                      <div className="text-[10px] opacity-60" style={{ color: 'var(--text-primary)' }}>{airplaneMode ? 'Вкл.' : 'Выкл.'}</div>
+                    </div>
+                  </button>
+                </div>
+
                 {/* Focus */}
                 <div className="liquid-glass rounded-xl p-3 mb-3">
                   <button
@@ -290,7 +487,9 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                     onClick={() => setFocusMode(!focusMode)}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${focusMode ? 'bg-purple-500' : 'bg-gray-500'}`}>
-                      <span className="material-icons text-white text-sm">focus_mode</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
                     </div>
                     <div className="text-left">
                       <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Фокусирование</div>
@@ -302,7 +501,9 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                 {/* Display Brightness */}
                 <div className="liquid-glass rounded-xl p-3 mb-3">
                   <div className="flex items-center gap-3">
-                    <span className="material-icons text-sm" style={{ color: 'var(--text-primary)' }}>brightness_high</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-primary)' }}>
+                      <path d="M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+                    </svg>
                     <input
                       type="range"
                       min="30"
@@ -318,7 +519,9 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                 {/* Sound */}
                 <div className="liquid-glass rounded-xl p-3">
                   <div className="flex items-center gap-3">
-                    <span className="material-icons text-sm" style={{ color: 'var(--text-primary)' }}>volume_up</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-primary)' }}>
+                      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                    </svg>
                     <input
                       type="range"
                       min="0"
@@ -345,9 +548,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
             }}
             title={isFullscreen ? 'Выйти из полноэкранного режима' : 'Полноэкранный режим'}
           >
-            <span className="material-icons text-sm" style={{ color: 'var(--text-primary)' }}>
-              {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
-            </span>
+            {isFullscreen ? <Icons.fullscreenExit /> : <Icons.fullscreen />}
           </button>
 
           {/* Date & Time */}

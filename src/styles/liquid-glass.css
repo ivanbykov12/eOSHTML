@@ -257,6 +257,62 @@ body {
   }
 }
 
+/* Touch mode - manually enabled */
+body.touch-mode {
+  --button-size: 44px;
+}
+
+body.touch-mode button,
+body.touch-mode .btn,
+body.touch-mode [role="button"],
+body.touch-mode .dock-item,
+body.touch-mode .desktop-icon {
+  min-height: var(--button-size);
+  min-width: var(--button-size);
+}
+
+body.touch-mode input,
+body.touch-mode select,
+body.touch-mode textarea {
+  min-height: 44px;
+  font-size: 16px !important;
+}
+
+/* Button size variants */
+:root {
+  --base-font-size: 14px;
+}
+
+[data-button-size="small"] {
+  --button-size: 32px;
+}
+
+[data-button-size="medium"] {
+  --button-size: 40px;
+}
+
+[data-button-size="large"] {
+  --button-size: 48px;
+}
+
+/* Apply button size to all interactive elements */
+button,
+.btn,
+[role="button"],
+.dock-item,
+.desktop-icon,
+input[type="button"],
+input[type="submit"] {
+  min-height: var(--button-size, 40px);
+  min-width: var(--button-size, 40px);
+  transition: all 0.2s ease;
+}
+
+/* Font size */
+body {
+  font-size: var(--base-font-size, 14px);
+}
+
 /* Prevent text selection on touch */
 .select-none {
   -webkit-user-select: none;

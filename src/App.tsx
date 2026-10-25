@@ -97,6 +97,25 @@ export default function App() {
     }
   }, [isDark]);
 
+  // Apply touch mode and button size
+  useEffect(() => {
+    const settings = loadSettings();
+    
+    if (settings.touchMode) {
+      document.body.classList.add('touch-mode');
+    } else {
+      document.body.classList.remove('touch-mode');
+    }
+
+    // Apply button size
+    const buttonSize = settings.buttonSize || 'medium';
+    document.documentElement.setAttribute('data-button-size', buttonSize);
+    
+    // Apply font size
+    const fontSize = settings.fontSize || 14;
+    document.documentElement.style.setProperty('--base-font-size', fontSize + 'px');
+  }, []);
+
   const openApp = useCallback((appId: string, appName?: string) => {
     const appData = installedApps.find(a => a.id === appId);
     if (!appData?.app && !appName) return;
@@ -203,6 +222,25 @@ export default function App() {
         }
         if (changes.brightness !== undefined) {
           setBrightness(changes.brightness);
+        }
+        
+        // Apply touch mode
+        if (changes.touchMode !== undefined) {
+          if (changes.touchMode) {
+            document.body.classList.add('touch-mode');
+          } else {
+            document.body.classList.remove('touch-mode');
+          }
+        }
+        
+        // Apply button size
+        if (changes.buttonSize !== undefined) {
+          document.documentElement.setAttribute('data-button-size', changes.buttonSize);
+        }
+        
+        // Apply font size
+        if (changes.fontSize !== undefined) {
+          document.documentElement.style.setProperty('--base-font-size', changes.fontSize + 'px');
         }
         
         // Notify all windows about theme change
