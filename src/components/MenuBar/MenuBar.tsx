@@ -10,6 +10,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
   const [time, setTime] = useState(new Date());
   const [showAppleMenu, setShowAppleMenu] = useState(false);
   const [showControlCenter, setShowControlCenter] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const appleMenuRef = useRef<HTMLDivElement>(null);
   const controlCenterRef = useRef<HTMLDivElement>(null);
 
@@ -18,6 +19,42 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
   const [focusMode, setFocusMode] = useState(false);
   const [brightness, setBrightness] = useState(100);
   const [volume, setVolume] = useState(75);
+
+  // Track fullscreen state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if ((elem as any).webkitRequestFullscreen) {
+        (elem as any).webkitRequestFullscreen();
+      } else if ((elem as any).msRequestFullscreen) {
+        (elem as any).msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      } else if ((document as any).msExitFullscreen) {
+        (document as any).msExitFullscreen();
+      }
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -296,6 +333,22 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
               </div>
             )}
           </div>
+
+          {/* Fullscreen Button */}
+          <button
+            className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-white/10 transition-colors"
+            onClick={toggleFullscreen}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleFullscreen();
+            }}
+            title={isFullscreen ? 'Выйти из полноэкранного режима' : 'Полноэкранный режим'}
+          >
+            <span className="material-icons text-sm" style={{ color: 'var(--text-primary)' }}>
+              {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
+            </span>
+          </button>
 
           {/* Date & Time */}
           <span className="text-sm ml-2" style={{ color: 'var(--text-primary)' }}>

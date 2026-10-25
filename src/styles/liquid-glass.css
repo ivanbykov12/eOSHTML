@@ -234,10 +234,16 @@ body {
     transform: none !important;
   }
   
-  /* Larger buttons */
-  button {
-    min-height: 44px;
-    min-width: 44px;
+  /* Compact window control buttons for touch */
+  .window-control-btn {
+    width: 10px !important;
+    height: 10px !important;
+    min-width: 10px !important;
+    min-height: 10px !important;
+  }
+  
+  .window-control-btn .material-icons {
+    font-size: 6px !important;
   }
   
   /* Prevent zoom on input focus */

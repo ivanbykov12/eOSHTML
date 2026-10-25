@@ -44,6 +44,33 @@ export default function App() {
       setWallpaper(settings.wallpaper);
     }
 
+    // Auto fullscreen on touch devices
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice && !document.fullscreenElement) {
+      const requestFullscreen = () => {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen().catch(err => {
+            console.log('Fullscreen request failed:', err);
+          });
+        } else if ((elem as any).webkitRequestFullscreen) {
+          (elem as any).webkitRequestFullscreen();
+        } else if ((elem as any).msRequestFullscreen) {
+          (elem as any).msRequestFullscreen();
+        }
+      };
+      
+      // Try to enter fullscreen on first user interaction
+      const handleFirstTouch = () => {
+        requestFullscreen();
+        document.removeEventListener('touchstart', handleFirstTouch);
+        document.removeEventListener('click', handleFirstTouch);
+      };
+      
+      document.addEventListener('touchstart', handleFirstTouch, { once: true });
+      document.addEventListener('click', handleFirstTouch, { once: true });
+    }
+
     // Load system .eapp files from /apps/system/
     loadSystemApps().then(apps => {
       const installed: InstalledApp[] = apps.map(app => ({

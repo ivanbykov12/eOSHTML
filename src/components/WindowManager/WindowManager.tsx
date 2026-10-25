@@ -204,19 +204,19 @@ export default function WindowManager({
             {/* Traffic Lights */}
             <div className="flex gap-2 mr-3">
               <button
-                className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center group"
+                className="window-control-btn w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center group"
                 onClick={(e) => { e.stopPropagation(); closeWindow(win.id); }}
               >
                 <span className="material-icons text-[8px] text-red-900 opacity-0 group-hover:opacity-100">close</span>
               </button>
               <button
-                className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors flex items-center justify-center group"
+                className="window-control-btn w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors flex items-center justify-center group"
                 onClick={(e) => { e.stopPropagation(); minimizeWindow(win.id); }}
               >
                 <span className="material-icons text-[8px] text-yellow-900 opacity-0 group-hover:opacity-100">remove</span>
               </button>
               <button
-                className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors flex items-center justify-center group"
+                className="window-control-btn w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors flex items-center justify-center group"
                 onClick={(e) => { e.stopPropagation(); maximizeWindow(win.id); }}
               >
                 <span className="material-icons text-[8px] text-green-900 opacity-0 group-hover:opacity-100">fullscreen</span>
