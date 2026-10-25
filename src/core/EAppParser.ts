@@ -77,6 +77,10 @@ const SYSTEM_APP_FILES = [
   'appstore.eapp',
   'calculator.eapp',
   'about.eapp',
+  'notes.eapp',
+  'clock.eapp',
+  'textedit.eapp',
+  'sysmonitor.eapp',
 ];
 
 /**

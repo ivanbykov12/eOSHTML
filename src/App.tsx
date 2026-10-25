@@ -25,6 +25,7 @@ export default function App() {
   const [showMissionControl, setShowMissionControl] = useState(false);
   const [installedApps, setInstalledApps] = useState<InstalledApp[]>([]);
   const [brightness, setBrightness] = useState(100);
+  const [wallpaper, setWallpaper] = useState('https://image.qwenlm.ai/generated-images/5e8ac870-af53-4f3f-a451-4014bb9cce09/_result.png');
   const [systemAppsLoaded, setSystemAppsLoaded] = useState(false);
 
   // Initialize - load settings and system apps
@@ -38,6 +39,9 @@ export default function App() {
     }
     if (settings.brightness) {
       setBrightness(settings.brightness);
+    }
+    if (settings.wallpaper) {
+      setWallpaper(settings.wallpaper);
     }
 
     // Load system .eapp files from /apps/system/
@@ -118,6 +122,14 @@ export default function App() {
               app: app
             }];
           });
+        }
+      }
+      
+      // Handle wallpaper change
+      if (e.data?.type === 'eos-wallpaper-change') {
+        const { wallpaper } = e.data;
+        if (wallpaper) {
+          setWallpaper(wallpaper);
         }
       }
     };
@@ -251,7 +263,7 @@ export default function App() {
       {/* Wallpaper */}
       <div className="absolute inset-0"
         style={{
-          backgroundImage: 'url(https://image.qwenlm.ai/generated-images/5e8ac870-af53-4f3f-a451-4014bb9cce09/_result.png)',
+          backgroundImage: `url(${wallpaper})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           opacity: isDark ? 0.8 : 0.6,

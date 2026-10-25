@@ -11,6 +11,7 @@ export interface EPhoneSettings {
   accentColor?: string;
   language?: string;
   region?: string;
+  wallpaper?: string;
 }
 
 export interface EPhoneContext {
