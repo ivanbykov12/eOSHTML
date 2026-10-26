@@ -2,6 +2,7 @@
   "id": "epple_id",
   "name": "Epple ID",
   "icon": "material:account_circle",
+  "iconUrl": "https://cdn-icons-png.flaticon.com/512/668/668283.png",
   "color": "from-blue-500 to-indigo-600",
   "version": "1.0.0",
   "author": "eOS System",

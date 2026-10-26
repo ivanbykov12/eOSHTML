@@ -2,6 +2,7 @@
   "id": "music_desktop",
   "name": "Музыка",
   "icon": "material:music_note",
+  "iconUrl": "https://cdn.jim-nielsen.com/.netlify/images?url=/icongallery/macos/music-2025-11-13/1024.png&w=512",
   "color": "from-red-500 to-pink-600",
   "version": "1.0.0",
   "author": "eOS System",

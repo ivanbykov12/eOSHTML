@@ -4,6 +4,7 @@ export interface EAppBase {
   id: string;
   name: string;
   icon: string;
+  iconUrl?: string;
   color: string;
   code: string;
   style?: string;

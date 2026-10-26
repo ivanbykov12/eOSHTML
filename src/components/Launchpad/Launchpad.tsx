@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 
 interface LaunchpadProps {
-  apps: { id: string; name: string; icon: string; color: string }[];
+  apps: { id: string; name: string; icon: string; iconUrl?: string; color: string }[];
   onAppClick: (appId: string) => void;
   onClose: () => void;
+  onAddToDock?: (appId: string) => void;
 }
 
-export default function Launchpad({ apps, onAppClick, onClose }: LaunchpadProps) {
+export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: LaunchpadProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const appsPerPage = 35; // 7x5 grid
@@ -84,13 +85,28 @@ export default function Launchpad({ apps, onAppClick, onClose }: LaunchpadProps)
                 onAppClick(app.id);
                 onClose();
               }}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData('appId', app.id);
+                e.dataTransfer.effectAllowed = 'copy';
+              }}
             >
               <div 
-                className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg mb-2 transition-transform group-hover:scale-110`}
+                className={`w-16 h-16 rounded-2xl overflow-hidden shadow-lg mb-2 transition-transform group-hover:scale-110`}
               >
-                <span className="material-icons text-white text-3xl">
-                  {getIconName(app.icon)}
-                </span>
+                {app.iconUrl ? (
+                  <img 
+                    src={app.iconUrl} 
+                    alt={app.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>
+                    <span className="material-icons text-white text-3xl">
+                      {getIconName(app.icon)}
+                    </span>
+                  </div>
+                )}
               </div>
               <span className="text-white text-xs text-center font-medium drop-shadow-lg">
                 {app.name}

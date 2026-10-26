@@ -14,6 +14,7 @@ interface InstalledApp {
   id: string;
   name: string;
   icon: string;
+  iconUrl?: string;
   color: string;
   app?: EApp;
 }
@@ -29,6 +30,15 @@ export default function App() {
   const [brightness, setBrightness] = useState(100);
   const [wallpaper, setWallpaper] = useState('https://image.qwenlm.ai/generated-images/5e8ac870-af53-4f3f-a451-4014bb9cce09/_result.png');
   const [systemAppsLoaded, setSystemAppsLoaded] = useState(false);
+
+  const handleDockReorder = (fromIndex: number, toIndex: number) => {
+    setInstalledApps(prev => {
+      const newApps = [...prev];
+      const [movedApp] = newApps.splice(fromIndex, 1);
+      newApps.splice(toIndex, 0, movedApp);
+      return newApps;
+    });
+  };
 
   // Initialize - load settings and system apps
   useEffect(() => {
@@ -79,6 +89,7 @@ export default function App() {
         id: app.id,
         name: app.name,
         icon: app.icon,
+        iconUrl: app.iconUrl,
         color: app.color,
         app,
       }));
@@ -335,6 +346,7 @@ export default function App() {
     id: a.id,
     name: a.name,
     icon: a.icon,
+    iconUrl: a.iconUrl,
     color: a.color,
   }));
 
@@ -390,12 +402,14 @@ export default function App() {
         style={{ background: `rgba(0,0,0,${(100 - brightness) / 200})` }}
       />
 
-      {/* Menu Bar */}
-      <MenuBar 
-        activeWindowTitle={activeWindowTitle} 
-        isDark={isDark} 
-        onOpenApp={openApp} 
-      />
+      {/* Menu Bar - hidden in Launchpad */}
+      {!showLaunchpad && (
+        <MenuBar 
+          activeWindowTitle={activeWindowTitle} 
+          isDark={isDark} 
+          onOpenApp={openApp} 
+        />
+      )}
 
       {/* Desktop */}
       <Desktop
@@ -427,6 +441,10 @@ export default function App() {
           apps={dockApps}
           onAppClick={handleDockClick}
           onClose={() => setShowLaunchpad(false)}
+          onAddToDock={(appId) => {
+            // App is already in dock, just close launchpad
+            setShowLaunchpad(false);
+          }}
         />
       )}
 
@@ -436,6 +454,7 @@ export default function App() {
         openAppIds={openAppIds}
         onAppClick={handleDockClick}
         onLaunchpadClick={() => setShowLaunchpad(true)}
+        onReorder={handleDockReorder}
       />
     </div>
   );

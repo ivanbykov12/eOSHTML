@@ -2,6 +2,7 @@
   "id": "textedit_desktop",
   "name": "TextEdit",
   "icon": "material:edit_note",
+  "iconUrl": "https://cdn.jim-nielsen.com/.netlify/images?url=/icongallery/macos/textedit-2025-11-14/1024.png&w=512",
   "color": "from-blue-400 to-blue-600",
   "version": "1.0.0",
   "author": "eOS System",

@@ -2,6 +2,7 @@
   "id": "clock_desktop",
   "name": "Часы",
   "icon": "material:schedule",
+  "iconUrl": "https://cdn.jim-nielsen.com/.netlify/images?url=/icongallery/macos/clock-2025-11-13/1024.png&w=512",
   "color": "from-blue-500 to-cyan-500",
   "version": "1.0.0",
   "author": "eOS System",

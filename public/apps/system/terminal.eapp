@@ -2,6 +2,7 @@
   "id": "terminal_desktop",
   "name": "Терминал",
   "icon": "material:terminal",
+  "iconUrl": "https://cdn.jim-nielsen.com/.netlify/images?url=/icongallery/macos/terminal-2026-09-23/1024.png&w=512",
   "color": "from-gray-800 to-black",
   "version": "2.0.0",
   "author": "eOS System",
