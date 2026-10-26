@@ -202,24 +202,24 @@ export default function WindowManager({
             onDoubleClick={() => maximizeWindow(win.id)}
           >
             {/* Traffic Lights */}
-            <div className="flex gap-2 mr-3">
+            <div className="flex gap-1.5 mr-3">
               <button
-                className="window-control-btn w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center group"
+                className="window-control-btn w-2.5 h-2.5 rounded-full bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center group"
                 onClick={(e) => { e.stopPropagation(); closeWindow(win.id); }}
               >
-                <span className="material-icons text-[8px] text-red-900 opacity-0 group-hover:opacity-100">close</span>
+                <span className="material-icons text-[6px] text-red-900 opacity-0 group-hover:opacity-100">close</span>
               </button>
               <button
-                className="window-control-btn w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors flex items-center justify-center group"
+                className="window-control-btn w-2.5 h-2.5 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors flex items-center justify-center group"
                 onClick={(e) => { e.stopPropagation(); minimizeWindow(win.id); }}
               >
-                <span className="material-icons text-[8px] text-yellow-900 opacity-0 group-hover:opacity-100">remove</span>
+                <span className="material-icons text-[6px] text-yellow-900 opacity-0 group-hover:opacity-100">remove</span>
               </button>
               <button
-                className="window-control-btn w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors flex items-center justify-center group"
+                className="window-control-btn w-2.5 h-2.5 rounded-full bg-green-500 hover:bg-green-600 transition-colors flex items-center justify-center group"
                 onClick={(e) => { e.stopPropagation(); maximizeWindow(win.id); }}
               >
-                <span className="material-icons text-[8px] text-green-900 opacity-0 group-hover:opacity-100">fullscreen</span>
+                <span className="material-icons text-[6px] text-green-900 opacity-0 group-hover:opacity-100">fullscreen</span>
               </button>
             </div>
 

@@ -240,9 +240,13 @@ button,
 [role="button"],
 input[type="button"],
 input[type="submit"] {
-  min-height: var(--button-size);
-  min-width: var(--button-size);
   transition: all 0.2s ease;
+}
+
+/* Window control buttons should not have min-size */
+.window-control-btn {
+  min-height: auto !important;
+  min-width: auto !important;
 }
 
 /* Touch mode - manually enabled for larger touch targets */
@@ -250,7 +254,7 @@ body.touch-mode {
   --button-size: 40px;
 }
 
-body.touch-mode button,
+body.touch-mode button:not(.window-control-btn),
 body.touch-mode .btn,
 body.touch-mode [role="button"] {
   min-height: var(--button-size);
