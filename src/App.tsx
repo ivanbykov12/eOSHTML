@@ -263,6 +263,34 @@ export default function App() {
           }, '*');
         }
       }
+
+      // Handle request for installed apps
+      if (e.data?.type === 'eos-get-installed-apps') {
+        const installedAppsData = installedApps.map(a => ({
+          id: a.id,
+          name: a.name,
+          icon: a.icon,
+          color: a.color,
+          isSystem: a.app && 'isSystem' in a.app ? a.app.isSystem : false
+        }));
+        const source = e.source as Window;
+        if (source) {
+          source.postMessage({
+            type: 'eos-installed-apps-data',
+            apps: installedAppsData
+          }, '*');
+        }
+      }
+
+      // Handle app removal
+      if (e.data?.type === 'eapp-remove') {
+        const { appId } = e.data;
+        if (appId && appId !== 'settings_desktop' && appId !== 'appstore_desktop') {
+          setInstalledApps(prev => prev.filter(a => a.id !== appId));
+          // Close all windows of this app
+          setWindows(prev => prev.filter(w => w.appId !== appId));
+        }
+      }
       
       // Handle wallpaper change
       if (e.data?.type === 'eos-wallpaper-change') {
