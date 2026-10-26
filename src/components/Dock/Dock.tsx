@@ -7,9 +7,10 @@ interface DockProps {
   onAppClick: (appId: string) => void;
   onLaunchpadClick?: () => void;
   onReorder?: (fromIndex: number, toIndex: number) => void;
+  dockSize?: number;
 }
 
-export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, onReorder }: DockProps) {
+export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, onReorder, dockSize = 48 }: DockProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [touchActive, setTouchActive] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -85,11 +86,11 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
           onMouseEnter={() => setHoveredIndex(0)}
           onClick={() => onAppClick('finder_desktop')}
         >
-          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
+          <div className="rounded-xl overflow-hidden shadow-lg" style={{ width: dockSize, height: dockSize }}>
             <img 
               src="https://cdn.jim-nielsen.com/.netlify/images?url=/icongallery/macos/finder-2026-09-23/1024.png&w=512" 
               alt="Finder"
-              className="w-full h-full object-cover scale-105"
+              className="w-full h-full object-cover scale-112"
             />
           </div>
           {openAppIds.includes('finder_desktop') && (
@@ -177,16 +178,16 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
               )}
 
               {/* Icon */}
-              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
+              <div className="rounded-xl overflow-hidden shadow-lg" style={{ width: dockSize, height: dockSize }}>
                 {app.iconUrl ? (
                   <img 
                     src={app.iconUrl} 
                     alt={app.name}
-                    className="w-full h-full object-cover scale-105"
+                    className="w-full h-full object-cover scale-112"
                   />
                 ) : (
                   <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>
-                    <span className="material-icons text-white text-2xl">{getIconName(app.icon)}</span>
+                    <span className="material-icons text-white" style={{ fontSize: dockSize * 0.5 }}>{getIconName(app.icon)}</span>
                   </div>
                 )}
               </div>
@@ -212,11 +213,11 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
           }}
           onMouseEnter={() => setHoveredIndex(apps.length + 2)}
         >
-          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
+          <div className="rounded-xl overflow-hidden shadow-lg" style={{ width: dockSize, height: dockSize }}>
             <img 
               src="https://www.nicepng.com/png/full/203-2036322_yosemite-trash-can-icon-os-x-mac-os.png" 
               alt="Trash"
-              className="w-full h-full object-cover scale-105"
+              className="w-full h-full object-cover scale-112"
             />
           </div>
         </div>

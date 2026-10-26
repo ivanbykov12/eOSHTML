@@ -15,6 +15,7 @@ export interface EPhoneSettings {
   touchMode?: boolean;
   buttonSize?: 'small' | 'medium' | 'large';
   fontSize?: number;
+  dockSize?: number;
 }
 
 export interface EPhoneContext {

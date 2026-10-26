@@ -228,16 +228,27 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
       case 'settings':
         onOpenApp('settings_desktop');
         break;
+      case 'appstore':
+        onOpenApp('appstore_desktop');
+        break;
       case 'sleep':
         console.log('Sleep mode activated');
         break;
       case 'restart':
-        if (confirm('Перезагрузить систему?')) {
+        if (confirm('Restart your computer?')) {
           window.location.reload();
         }
         break;
+      case 'shutdown':
+        if (confirm('Shut down your computer?')) {
+          window.location.reload();
+        }
+        break;
+      case 'lock':
+        console.log('Lock screen activated');
+        break;
       case 'logout':
-        if (confirm('Завершить сеанс?')) {
+        if (confirm('Log out of this user?')) {
           localStorage.removeItem('eos_setup_complete');
           window.location.reload();
         }
@@ -291,11 +302,11 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                 onClick={e => e.stopPropagation()}
               >
                 <div 
-                  className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors" 
+                  className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors font-semibold" 
                   style={{ color: 'var(--text-primary)' }}
                   onClick={() => handleAppleMenuClick('about')}
                 >
-                  Об этом eOS
+                  About This Mac
                 </div>
                 <div className="border-t border-white/10 my-1" />
                 <div 
@@ -303,7 +314,17 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                   style={{ color: 'var(--text-primary)' }}
                   onClick={() => handleAppleMenuClick('settings')}
                 >
-                  Системные настройки...
+                  System Preferences...
+                </div>
+                <div 
+                  className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors" 
+                  style={{ color: 'var(--text-primary)' }}
+                  onClick={() => handleAppleMenuClick('appstore')}
+                >
+                  App Store...
+                </div>
+                <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors opacity-60">
+                  Recent Items ▸
                 </div>
                 <div className="border-t border-white/10 my-1" />
                 <div 
@@ -311,22 +332,36 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                   style={{ color: 'var(--text-primary)' }}
                   onClick={() => handleAppleMenuClick('sleep')}
                 >
-                  Режим сна
+                  Sleep
                 </div>
                 <div 
                   className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors" 
                   style={{ color: 'var(--text-primary)' }}
                   onClick={() => handleAppleMenuClick('restart')}
                 >
-                  Перезагрузить...
+                  Restart...
+                </div>
+                <div 
+                  className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors" 
+                  style={{ color: 'var(--text-primary)' }}
+                  onClick={() => handleAppleMenuClick('shutdown')}
+                >
+                  Shut Down...
                 </div>
                 <div className="border-t border-white/10 my-1" />
+                <div 
+                  className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors" 
+                  style={{ color: 'var(--text-primary)' }}
+                  onClick={() => handleAppleMenuClick('lock')}
+                >
+                  Lock Screen
+                </div>
                 <div 
                   className="px-4 py-1.5 hover:bg-red-500/20 cursor-pointer text-sm transition-colors text-red-400" 
                   style={{ color: 'var(--text-primary)' }}
                   onClick={() => handleAppleMenuClick('logout')}
                 >
-                  Завершить сеанс...
+                  Log Out...
                 </div>
               </div>
             )}

@@ -111,7 +111,7 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
                   <img 
                     src={app.iconUrl} 
                     alt={app.name}
-                    className="w-full h-full object-cover scale-105"
+                    className="w-full h-full object-cover scale-112"
                   />
                 ) : (
                   <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>
@@ -131,9 +131,61 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
         {currentApps.length === 0 && (
           <div className="text-center text-white/50 mt-20">
             <span className="material-icons text-6xl mb-4 block">search_off</span>
-            <p>Ничего не найдено</p>
+            <p>Nothing found</p>
           </div>
         )}
+      </div>
+
+      {/* Dock in Launchpad */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[8600]">
+        <div className="liquid-glass-heavy flex items-end gap-2 px-4 py-2 rounded-2xl">
+          {/* Finder */}
+          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg cursor-pointer hover:scale-110 transition-transform">
+            <img 
+              src="https://cdn.jim-nielsen.com/.netlify/images?url=/icongallery/macos/finder-2026-09-23/1024.png&w=512" 
+              alt="Finder"
+              className="w-full h-full object-cover scale-112"
+            />
+          </div>
+          
+          {/* Apps */}
+          {apps.slice(0, 6).map((app, idx) => (
+            <div
+              key={app.id}
+              className="w-12 h-12 rounded-xl overflow-hidden shadow-lg cursor-pointer hover:scale-110 transition-transform"
+              onClick={() => {
+                onAppClick(app.id);
+                onClose();
+              }}
+            >
+              {app.iconUrl ? (
+                <img 
+                  src={app.iconUrl} 
+                  alt={app.name}
+                  className="w-full h-full object-cover scale-112"
+                />
+              ) : (
+                <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>
+                  <span className="material-icons text-white text-2xl">
+                    {getIconName(app.icon)}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
+          
+          {/* Separator */}
+          <div className="w-px h-10 bg-white/20 mx-1 self-center" />
+          
+          {/* Trash */}
+          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
+            <img 
+              src="https://www.nicepng.com/png/full/203-2036322_yosemite-trash-can-icon-os-x-mac-os.png" 
+              alt="Trash"
+              className="w-full h-full object-cover scale-112"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Page Indicators */}

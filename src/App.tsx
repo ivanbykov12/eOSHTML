@@ -29,6 +29,7 @@ export default function App() {
   const [installedApps, setInstalledApps] = useState<InstalledApp[]>([]);
   const [brightness, setBrightness] = useState(100);
   const [wallpaper, setWallpaper] = useState('https://image.qwenlm.ai/generated-images/5e8ac870-af53-4f3f-a451-4014bb9cce09/_result.png');
+  const [dockSize, setDockSize] = useState(48);
   const [systemAppsLoaded, setSystemAppsLoaded] = useState(false);
 
   const handleDockReorder = (fromIndex: number, toIndex: number) => {
@@ -54,6 +55,9 @@ export default function App() {
     }
     if (settings.wallpaper) {
       setWallpaper(settings.wallpaper);
+    }
+    if (settings.dockSize) {
+      setDockSize(settings.dockSize);
     }
 
     // Auto fullscreen on touch devices
@@ -235,6 +239,9 @@ export default function App() {
         }
         if (changes.brightness !== undefined) {
           setBrightness(changes.brightness);
+        }
+        if (changes.dockSize !== undefined) {
+          setDockSize(changes.dockSize);
         }
         
         // Apply touch mode
@@ -455,6 +462,7 @@ export default function App() {
         onAppClick={handleDockClick}
         onLaunchpadClick={() => setShowLaunchpad(true)}
         onReorder={handleDockReorder}
+        dockSize={dockSize}
       />
     </div>
   );
