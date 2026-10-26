@@ -285,7 +285,8 @@ export default function App() {
       // Handle app removal
       if (e.data?.type === 'eapp-remove') {
         const { appId } = e.data;
-        if (appId && appId !== 'settings_desktop' && appId !== 'appstore_desktop') {
+        const SYSTEM_APPS = ['settings_desktop', 'appstore_desktop', 'finder_desktop'];
+        if (appId && !SYSTEM_APPS.includes(appId)) {
           setInstalledApps(prev => prev.filter(a => a.id !== appId));
           // Close all windows of this app
           setWindows(prev => prev.filter(w => w.appId !== appId));
