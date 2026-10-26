@@ -83,7 +83,7 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
           >
             <div className={`w-12 h-12 rounded-xl overflow-hidden shadow-lg mb-1`}>
               {app.iconUrl ? (
-                <img src={app.iconUrl} alt={app.name} className="w-full h-full object-cover scale-115" />
+                <img src={app.iconUrl} alt={app.name} className="w-full h-full object-cover scale-117" />
               ) : (
                 <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>
                   <span className="material-icons text-white text-2xl">{getIconName(app.icon)}</span>
