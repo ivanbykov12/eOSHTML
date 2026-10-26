@@ -27,6 +27,7 @@ export default function App() {
   const [showMissionControl, setShowMissionControl] = useState(false);
   const [showLaunchpad, setShowLaunchpad] = useState(false);
   const [installedApps, setInstalledApps] = useState<InstalledApp[]>([]);
+  const [storeApps, setStoreApps] = useState<InstalledApp[]>([]);
   const [brightness, setBrightness] = useState(100);
   const [wallpaper, setWallpaper] = useState('https://image.qwenlm.ai/generated-images/5e8ac870-af53-4f3f-a451-4014bb9cce09/_result.png');
   const [dockSize, setDockSize] = useState(48);
@@ -221,6 +222,44 @@ export default function App() {
               app: app
             }];
           });
+          // Remove from store apps if it was there
+          setStoreApps(prev => prev.filter(a => a.id !== app.id));
+        }
+      }
+
+      // Handle adding app to store (from drag&drop)
+      if (e.data?.type === 'eapp-add-to-store') {
+        const { app } = e.data;
+        if (app && app.id && app.name) {
+          setStoreApps(prev => {
+            if (prev.find(a => a.id === app.id)) {
+              return prev;
+            }
+            return [...prev, {
+              id: app.id,
+              name: app.name,
+              icon: app.icon || 'material:apps',
+              color: app.color || 'from-gray-500 to-gray-700',
+              app: app
+            }];
+          });
+        }
+      }
+
+      // Handle request for store apps
+      if (e.data?.type === 'eos-get-store-apps') {
+        const storeAppsData = storeApps.map(a => ({
+          id: a.id,
+          name: a.name,
+          icon: a.icon,
+          color: a.color
+        }));
+        const source = e.source as Window;
+        if (source) {
+          source.postMessage({
+            type: 'eos-store-apps-data',
+            apps: storeAppsData
+          }, '*');
         }
       }
       
@@ -293,7 +332,7 @@ export default function App() {
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [isDark, openApp]);
+  }, [isDark, openApp, storeApps]);
 
   // Keyboard shortcuts
   useEffect(() => {

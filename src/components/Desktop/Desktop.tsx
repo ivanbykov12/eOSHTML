@@ -37,7 +37,18 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
         const reader = new FileReader();
         reader.onload = (ev) => {
           const content = ev.target?.result as string;
-          fs.writeFile(`/users/ivan/Desktop/${file.name}`, content, { type: 'eapp' });
+          try {
+            const appData = JSON.parse(content);
+            // Save to filesystem
+            fs.writeFile(`/users/ivan/Desktop/${file.name}`, content, { type: 'eapp' });
+            // Add to store for installation
+            window.postMessage({
+              type: 'eapp-add-to-store',
+              app: appData
+            }, '*');
+          } catch (err) {
+            console.error('Invalid .eapp file:', err);
+          }
         };
         reader.readAsText(file);
       }
