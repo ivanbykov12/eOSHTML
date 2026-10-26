@@ -7,13 +7,15 @@ interface DockProps {
   onAppClick: (appId: string) => void;
   onLaunchpadClick?: () => void;
   onReorder?: (fromIndex: number, toIndex: number) => void;
+  onRemoveFromDock?: (appId: string) => void;
   dockSize?: number;
 }
 
-export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, onReorder, dockSize = 48 }: DockProps) {
+export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, onReorder, dockSize = 48, onRemoveFromDock }: DockProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [touchActive, setTouchActive] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; appId: string } | null>(null);
   const dockRef = useRef<HTMLDivElement>(null);
 
   const getScale = (index: number): number => {
@@ -163,6 +165,11 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
                   onAppClick(app.id);
                 }
               }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setContextMenu({ x: e.clientX, y: e.clientY, appId: app.id });
+              }}
               draggable
               onDragStart={(e) => handleDragStart(e, actualIndex)}
               onDragOver={(e) => handleDragOver(e, actualIndex)}
@@ -222,6 +229,48 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
           </div>
         </div>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <>
+          <div 
+            className="fixed inset-0 z-[9998]" 
+            onClick={() => setContextMenu(null)}
+          />
+          <div
+            className="fixed z-[9999] liquid-glass rounded-xl py-2 min-w-[200px] shadow-2xl"
+            style={{ 
+              left: contextMenu.x, 
+              top: contextMenu.y,
+              background: 'rgba(30, 30, 30, 0.85)',
+              backdropFilter: 'blur(30px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+            }}
+          >
+            <div 
+              className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors text-white"
+              onClick={() => {
+                onAppClick(contextMenu.appId);
+                setContextMenu(null);
+              }}
+            >
+              Открыть
+            </div>
+            <div className="border-t border-white/10 my-1" />
+            <div 
+              className="px-4 py-1.5 hover:bg-red-500/20 cursor-pointer text-sm transition-colors text-red-400"
+              onClick={() => {
+                if (onRemoveFromDock) {
+                  onRemoveFromDock(contextMenu.appId);
+                }
+                setContextMenu(null);
+              }}
+            >
+              Удалить из Dock
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

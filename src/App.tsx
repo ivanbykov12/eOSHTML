@@ -41,6 +41,17 @@ export default function App() {
     });
   };
 
+  const handleRemoveFromDock = (appId: string) => {
+    setInstalledApps(prev => prev.filter(app => app.id !== appId));
+  };
+
+  const handleAddToDock = (appId: string) => {
+    const appData = installedApps.find(a => a.id === appId);
+    if (appData && !installedApps.find(a => a.id === appId)) {
+      setInstalledApps(prev => [...prev, appData]);
+    }
+  };
+
   // Initialize - load settings and system apps
   useEffect(() => {
     const settings = loadSettings();
@@ -452,6 +463,7 @@ export default function App() {
             // App is already in dock, just close launchpad
             setShowLaunchpad(false);
           }}
+          onDockDrop={handleAddToDock}
         />
       )}
 
@@ -462,6 +474,7 @@ export default function App() {
         onAppClick={handleDockClick}
         onLaunchpadClick={() => setShowLaunchpad(true)}
         onReorder={handleDockReorder}
+        onRemoveFromDock={handleRemoveFromDock}
         dockSize={dockSize}
       />
     </div>

@@ -5,9 +5,10 @@ interface LaunchpadProps {
   onAppClick: (appId: string) => void;
   onClose: () => void;
   onAddToDock?: (appId: string) => void;
+  onDockDrop?: (appId: string) => void;
 }
 
-export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: LaunchpadProps) {
+export default function Launchpad({ apps, onAppClick, onClose, onAddToDock, onDockDrop }: LaunchpadProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const appsPerPage = 35; // 7x5 grid
@@ -137,7 +138,21 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
       </div>
 
       {/* Dock in Launchpad */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[8600]">
+      <div 
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[8600]"
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const appId = e.dataTransfer.getData('appId');
+          if (appId && onDockDrop) {
+            onDockDrop(appId);
+          }
+        }}
+      >
         <div className="liquid-glass-heavy flex items-end gap-2 px-4 py-2 rounded-2xl">
           {/* Finder */}
           <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg cursor-pointer hover:scale-110 transition-transform">

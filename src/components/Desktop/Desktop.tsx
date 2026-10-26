@@ -10,6 +10,7 @@ interface DesktopProps {
 export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; item?: string } | null>(null);
+  const [iconPositions, setIconPositions] = useState<Record<string, { x: number; y: number }>>({});
 
   const desktopFiles = fs.list('/users/ivan/Desktop');
 
@@ -47,6 +48,21 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
     e.preventDefault();
   }, []);
 
+  const handleIconDragStart = useCallback((e: React.DragEvent, appId: string) => {
+    e.dataTransfer.setData('appId', appId);
+    e.dataTransfer.effectAllowed = 'move';
+  }, []);
+
+  const handleIconDragEnd = useCallback((e: React.DragEvent, appId: string) => {
+    const rect = (e.target as HTMLElement).closest('.desktop-icon')?.getBoundingClientRect();
+    if (rect) {
+      setIconPositions(prev => ({
+        ...prev,
+        [appId]: { x: rect.left, y: rect.top }
+      }));
+    }
+  }, []);
+
   return (
     <div
       className="absolute inset-0 pt-8 pb-20 px-4"
@@ -65,6 +81,14 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
             className={`desktop-icon flex flex-col items-center w-20 p-2 cursor-pointer ${
               selectedIcon === app.id ? 'selected' : ''
             }`}
+            style={iconPositions[app.id] ? {
+              position: 'absolute',
+              left: iconPositions[app.id].x,
+              top: iconPositions[app.id].y
+            } : undefined}
+            draggable
+            onDragStart={(e) => handleIconDragStart(e, app.id)}
+            onDragEnd={(e) => handleIconDragEnd(e, app.id)}
             onClick={(e) => { e.stopPropagation(); handleIconClick(app.id); }}
             onDoubleClick={() => handleIconDoubleClick(app)}
             onTouchEnd={(e) => {
