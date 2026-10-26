@@ -111,7 +111,7 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
                   <img 
                     src={app.iconUrl} 
                     alt={app.name}
-                    className="w-full h-full object-cover scale-112"
+                    className="w-full h-full object-cover scale-115"
                   />
                 ) : (
                   <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>
@@ -144,7 +144,7 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
             <img 
               src="https://cdn.jim-nielsen.com/.netlify/images?url=/icongallery/macos/finder-2026-09-23/1024.png&w=512" 
               alt="Finder"
-              className="w-full h-full object-cover scale-112"
+              className="w-full h-full object-cover scale-115"
             />
           </div>
           
@@ -162,7 +162,7 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
                 <img 
                   src={app.iconUrl} 
                   alt={app.name}
-                  className="w-full h-full object-cover scale-112"
+                  className="w-full h-full object-cover scale-115"
                 />
               ) : (
                 <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>
@@ -182,7 +182,7 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
             <img 
               src="https://www.nicepng.com/png/full/203-2036322_yosemite-trash-can-icon-os-x-mac-os.png" 
               alt="Trash"
-              className="w-full h-full object-cover scale-112"
+              className="w-full h-full object-cover scale-115"
             />
           </div>
         </div>
