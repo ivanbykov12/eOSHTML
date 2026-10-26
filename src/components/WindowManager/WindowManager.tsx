@@ -34,7 +34,7 @@ export default function WindowManager({
   currentModel,
 }: WindowManagerProps) {
   const [dragging, setDragging] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
-  const [resizing, setResizing] = useState<{ id: string; startX: number; startY: number; startW: number; startH: number } | null>(null);
+  const [resizing, setResizing] = useState<{ id: string; startX: number; startY: number; startW: number; startH: number; startXPos: number; startYPos: number; direction: string } | null>(null);
   const [compatibilityWarning, setCompatibilityWarning] = useState<{ windowId: string; app: EApp } | null>(null);
 
   const handleMouseDown = useCallback((e: React.MouseEvent, windowId: string) => {
@@ -62,7 +62,7 @@ export default function WindowManager({
     setActiveWindowId(windowId);
   }, [windows, setActiveWindowId]);
 
-  const handleResizeStart = useCallback((e: React.MouseEvent, windowId: string) => {
+  const handleResizeStart = useCallback((e: React.MouseEvent, windowId: string, direction: string) => {
     e.stopPropagation();
     const win = windows.find(w => w.id === windowId);
     if (!win) return;
@@ -73,6 +73,9 @@ export default function WindowManager({
       startY: e.clientY,
       startW: win.width,
       startH: win.height,
+      startXPos: win.x,
+      startYPos: win.y,
+      direction: direction,
     });
   }, [windows]);
 
@@ -88,11 +91,38 @@ export default function WindowManager({
       if (resizing) {
         const dx = e.clientX - resizing.startX;
         const dy = e.clientY - resizing.startY;
-        setWindows(prev => prev.map(w =>
-          w.id === resizing.id
-            ? { ...w, width: Math.max(300, resizing.startW + dx), height: Math.max(200, resizing.startH + dy) }
-            : w
-        ));
+        const dir = resizing.direction;
+        
+        setWindows(prev => prev.map(w => {
+          if (w.id !== resizing.id) return w;
+          
+          let newWidth = w.width;
+          let newHeight = w.height;
+          let newX = w.x;
+          let newY = w.y;
+          
+          // Horizontal resizing
+          if (dir.includes('e')) { // east (right)
+            newWidth = Math.max(300, resizing.startW + dx);
+          }
+          if (dir.includes('w')) { // west (left)
+            newWidth = Math.max(300, resizing.startW - dx);
+            newX = resizing.startXPos + dx;
+            if (newWidth <= 300) newX = resizing.startXPos + resizing.startW - 300;
+          }
+          
+          // Vertical resizing
+          if (dir.includes('s')) { // south (bottom)
+            newHeight = Math.max(200, resizing.startH + dy);
+          }
+          if (dir.includes('n')) { // north (top)
+            newHeight = Math.max(200, resizing.startH - dy);
+            newY = Math.max(28, resizing.startYPos + dy);
+            if (newHeight <= 200) newY = resizing.startYPos + resizing.startH - 200;
+          }
+          
+          return { ...w, width: newWidth, height: newHeight, x: newX, y: newY };
+        }));
       }
     };
 
@@ -113,11 +143,38 @@ export default function WindowManager({
         const touch = e.touches[0];
         const dx = touch.clientX - resizing.startX;
         const dy = touch.clientY - resizing.startY;
-        setWindows(prev => prev.map(w =>
-          w.id === resizing.id
-            ? { ...w, width: Math.max(300, resizing.startW + dx), height: Math.max(200, resizing.startH + dy) }
-            : w
-        ));
+        const dir = resizing.direction;
+        
+        setWindows(prev => prev.map(w => {
+          if (w.id !== resizing.id) return w;
+          
+          let newWidth = w.width;
+          let newHeight = w.height;
+          let newX = w.x;
+          let newY = w.y;
+          
+          // Horizontal resizing
+          if (dir.includes('e')) { // east (right)
+            newWidth = Math.max(300, resizing.startW + dx);
+          }
+          if (dir.includes('w')) { // west (left)
+            newWidth = Math.max(300, resizing.startW - dx);
+            newX = resizing.startXPos + dx;
+            if (newWidth <= 300) newX = resizing.startXPos + resizing.startW - 300;
+          }
+          
+          // Vertical resizing
+          if (dir.includes('s')) { // south (bottom)
+            newHeight = Math.max(200, resizing.startH + dy);
+          }
+          if (dir.includes('n')) { // north (top)
+            newHeight = Math.max(200, resizing.startH - dy);
+            newY = Math.max(28, resizing.startYPos + dy);
+            if (newHeight <= 200) newY = resizing.startYPos + resizing.startH - 200;
+          }
+          
+          return { ...w, width: newWidth, height: newHeight, x: newX, y: newY };
+        }));
       }
     };
 
@@ -272,25 +329,162 @@ export default function WindowManager({
             )}
           </div>
 
-          {/* Resize Handle */}
+          {/* Resize Handles - all sides and corners */}
           {!win.maximized && (
-            <div
-              className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize"
-              onMouseDown={(e) => handleResizeStart(e, win.id)}
-              onTouchStart={(e) => {
-                e.stopPropagation();
-                const currentWin = windows.find(w => w.id === win.id);
-                if (!currentWin) return;
-                const touch = e.touches[0];
-                setResizing({
-                  id: currentWin.id,
-                  startX: touch.clientX,
-                  startY: touch.clientY,
-                  startW: currentWin.width,
-                  startH: currentWin.height,
-                });
-              }}
-            />
+            <>
+              {/* Top edge */}
+              <div
+                className="absolute top-0 left-2 right-2 h-1 cursor-n-resize"
+                onMouseDown={(e) => handleResizeStart(e, win.id, 'n')}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  const touch = e.touches[0];
+                  setResizing({
+                    id: win.id,
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startW: win.width,
+                    startH: win.height,
+                    startXPos: win.x,
+                    startYPos: win.y,
+                    direction: 'n',
+                  });
+                }}
+              />
+              {/* Bottom edge */}
+              <div
+                className="absolute bottom-0 left-2 right-2 h-1 cursor-s-resize"
+                onMouseDown={(e) => handleResizeStart(e, win.id, 's')}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  const touch = e.touches[0];
+                  setResizing({
+                    id: win.id,
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startW: win.width,
+                    startH: win.height,
+                    startXPos: win.x,
+                    startYPos: win.y,
+                    direction: 's',
+                  });
+                }}
+              />
+              {/* Left edge */}
+              <div
+                className="absolute top-2 bottom-2 left-0 w-1 cursor-w-resize"
+                onMouseDown={(e) => handleResizeStart(e, win.id, 'w')}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  const touch = e.touches[0];
+                  setResizing({
+                    id: win.id,
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startW: win.width,
+                    startH: win.height,
+                    startXPos: win.x,
+                    startYPos: win.y,
+                    direction: 'w',
+                  });
+                }}
+              />
+              {/* Right edge */}
+              <div
+                className="absolute top-2 bottom-2 right-0 w-1 cursor-e-resize"
+                onMouseDown={(e) => handleResizeStart(e, win.id, 'e')}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  const touch = e.touches[0];
+                  setResizing({
+                    id: win.id,
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startW: win.width,
+                    startH: win.height,
+                    startXPos: win.x,
+                    startYPos: win.y,
+                    direction: 'e',
+                  });
+                }}
+              />
+              {/* Top-left corner */}
+              <div
+                className="absolute top-0 left-0 w-3 h-3 cursor-nw-resize"
+                onMouseDown={(e) => handleResizeStart(e, win.id, 'nw')}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  const touch = e.touches[0];
+                  setResizing({
+                    id: win.id,
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startW: win.width,
+                    startH: win.height,
+                    startXPos: win.x,
+                    startYPos: win.y,
+                    direction: 'nw',
+                  });
+                }}
+              />
+              {/* Top-right corner */}
+              <div
+                className="absolute top-0 right-0 w-3 h-3 cursor-ne-resize"
+                onMouseDown={(e) => handleResizeStart(e, win.id, 'ne')}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  const touch = e.touches[0];
+                  setResizing({
+                    id: win.id,
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startW: win.width,
+                    startH: win.height,
+                    startXPos: win.x,
+                    startYPos: win.y,
+                    direction: 'ne',
+                  });
+                }}
+              />
+              {/* Bottom-left corner */}
+              <div
+                className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize"
+                onMouseDown={(e) => handleResizeStart(e, win.id, 'sw')}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  const touch = e.touches[0];
+                  setResizing({
+                    id: win.id,
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startW: win.width,
+                    startH: win.height,
+                    startXPos: win.x,
+                    startYPos: win.y,
+                    direction: 'sw',
+                  });
+                }}
+              />
+              {/* Bottom-right corner */}
+              <div
+                className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize"
+                onMouseDown={(e) => handleResizeStart(e, win.id, 'se')}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  const touch = e.touches[0];
+                  setResizing({
+                    id: win.id,
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startW: win.width,
+                    startH: win.height,
+                    startXPos: win.x,
+                    startYPos: win.y,
+                    direction: 'se',
+                  });
+                }}
+              />
+            </>
           )}
         </div>
       ))}
