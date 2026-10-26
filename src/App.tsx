@@ -252,7 +252,8 @@ export default function App() {
           id: a.id,
           name: a.name,
           icon: a.icon,
-          color: a.color
+          color: a.color,
+          app: a.app // Include full app data
         }));
         const source = e.source as Window;
         if (source) {
