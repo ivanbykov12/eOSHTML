@@ -215,49 +215,39 @@ body {
   background: rgba(128, 128, 128, 0.5);
 }
 
-/* Touch-friendly styles for mobile/tablet */
-@media (hover: none) and (pointer: coarse) {
-  /* Increase touch targets */
-  .dock-item {
-    min-width: 56px;
-    min-height: 56px;
-  }
-  
-  .desktop-icon {
-    min-width: 80px;
-    min-height: 80px;
-    padding: 8px;
-  }
-  
-  /* Disable hover effects on touch devices */
-  .dock-item:hover {
-    transform: none !important;
-  }
-  
-  /* Compact window control buttons for touch */
-  .window-control-btn {
-    width: 10px !important;
-    height: 10px !important;
-    min-width: 10px !important;
-    min-height: 10px !important;
-  }
-  
-  .window-control-btn .material-icons {
-    font-size: 6px !important;
-  }
-  
-  /* Prevent zoom on input focus */
-  input, select, textarea {
-    font-size: 16px !important;
-  }
-  
-  /* Smoother touch scrolling */
-  * {
-    -webkit-overflow-scrolling: touch;
-  }
+/* Unified button sizes for all devices */
+:root {
+  --base-font-size: 14px;
+  --button-size: 40px;
 }
 
-/* Touch mode - manually enabled */
+/* Button size variants */
+[data-button-size="small"] {
+  --button-size: 36px;
+}
+
+[data-button-size="medium"] {
+  --button-size: 40px;
+}
+
+[data-button-size="large"] {
+  --button-size: 48px;
+}
+
+/* Apply button size to all interactive elements */
+button,
+.btn,
+[role="button"],
+.dock-item,
+.desktop-icon,
+input[type="button"],
+input[type="submit"] {
+  min-height: var(--button-size);
+  min-width: var(--button-size);
+  transition: all 0.2s ease;
+}
+
+/* Touch mode - manually enabled for larger touch targets */
 body.touch-mode {
   --button-size: 44px;
 }
@@ -278,39 +268,19 @@ body.touch-mode textarea {
   font-size: 16px !important;
 }
 
-/* Button size variants */
-:root {
-  --base-font-size: 14px;
-}
-
-[data-button-size="small"] {
-  --button-size: 32px;
-}
-
-[data-button-size="medium"] {
-  --button-size: 40px;
-}
-
-[data-button-size="large"] {
-  --button-size: 48px;
-}
-
-/* Apply button size to all interactive elements */
-button,
-.btn,
-[role="button"],
-.dock-item,
-.desktop-icon,
-input[type="button"],
-input[type="submit"] {
-  min-height: var(--button-size, 40px);
-  min-width: var(--button-size, 40px);
-  transition: all 0.2s ease;
-}
-
 /* Font size */
 body {
-  font-size: var(--base-font-size, 14px);
+  font-size: var(--base-font-size);
+}
+
+/* Smoother touch scrolling for all devices */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent zoom on input focus */
+input, select, textarea {
+  font-size: 16px;
 }
 
 /* Prevent text selection on touch */
