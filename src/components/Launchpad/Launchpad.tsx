@@ -49,6 +49,19 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
       }}
       onClick={onClose}
     >
+      {/* Close Button */}
+      <button
+        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+
       {/* Search Bar */}
       <div className="w-full max-w-md mb-8 px-4">
         <div className="relative">
@@ -98,7 +111,7 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
                   <img 
                     src={app.iconUrl} 
                     alt={app.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover scale-105"
                   />
                 ) : (
                   <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>

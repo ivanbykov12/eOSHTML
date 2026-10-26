@@ -18,9 +18,9 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
   const getScale = (index: number): number => {
     if (hoveredIndex === null) return 1;
     const distance = Math.abs(index - hoveredIndex);
-    if (distance === 0) return 1.4;
-    if (distance === 1) return 1.2;
-    if (distance === 2) return 1.05;
+    if (distance === 0) return 1.45;
+    if (distance === 1) return 1.25;
+    if (distance === 2) return 1.08;
     return 1;
   };
 
@@ -78,7 +78,7 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
         <div
           className="dock-item relative flex flex-col items-center cursor-pointer"
           style={{
-            transform: hoveredIndex === 0 ? 'translateY(-16px) scale(1.4)' : 'scale(1)',
+            transform: hoveredIndex === 0 ? 'translateY(-16px) scale(1.45)' : 'scale(1)',
             transformOrigin: 'bottom center',
             transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
@@ -89,7 +89,7 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
             <img 
               src="https://cdn.jim-nielsen.com/.netlify/images?url=/icongallery/macos/finder-2026-09-23/1024.png&w=512" 
               alt="Finder"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover scale-105"
             />
           </div>
           {openAppIds.includes('finder_desktop') && (
@@ -101,19 +101,25 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
         <div
           className="dock-item relative flex flex-col items-center cursor-pointer"
           style={{
-            transform: hoveredIndex === 1 ? 'translateY(-16px) scale(1.4)' : 'scale(1)',
+            transform: hoveredIndex === 1 ? 'translateY(-16px) scale(1.45)' : 'scale(1)',
             transformOrigin: 'bottom center',
             transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
           onMouseEnter={() => setHoveredIndex(1)}
           onClick={onLaunchpadClick}
         >
-          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
-            <img 
-              src="https://static.wikia.nocookie.net/logopedia/images/5/5b/LaunchPadTahoeDark.png/revision/latest/scale-to-width-down/250?cb=20260614011050" 
-              alt="Launchpad"
-              className="w-full h-full object-cover"
-            />
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center shadow-lg">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+              <circle cx="5" cy="5" r="2"/>
+              <circle cx="12" cy="5" r="2"/>
+              <circle cx="19" cy="5" r="2"/>
+              <circle cx="5" cy="12" r="2"/>
+              <circle cx="12" cy="12" r="2"/>
+              <circle cx="19" cy="12" r="2"/>
+              <circle cx="5" cy="19" r="2"/>
+              <circle cx="12" cy="19" r="2"/>
+              <circle cx="19" cy="19" r="2"/>
+            </svg>
           </div>
         </div>
 
@@ -176,7 +182,7 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
                   <img 
                     src={app.iconUrl} 
                     alt={app.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover scale-105"
                   />
                 ) : (
                   <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>
@@ -200,7 +206,7 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
         <div
           className="dock-item relative flex flex-col items-center cursor-pointer"
           style={{
-            transform: hoveredIndex === apps.length + 2 ? 'translateY(-16px) scale(1.4)' : 'scale(1)',
+            transform: hoveredIndex === apps.length + 2 ? 'translateY(-16px) scale(1.45)' : 'scale(1)',
             transformOrigin: 'bottom center',
             transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
@@ -210,7 +216,7 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
             <img 
               src="https://www.nicepng.com/png/full/203-2036322_yosemite-trash-can-icon-os-x-mac-os.png" 
               alt="Trash"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover scale-105"
             />
           </div>
         </div>

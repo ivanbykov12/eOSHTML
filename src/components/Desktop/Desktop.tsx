@@ -4,7 +4,7 @@ import { getIconName } from '../../core/EAppParser';
 
 interface DesktopProps {
   onOpenApp: (appId: string, appName: string) => void;
-  installedApps: { id: string; name: string; icon: string; color: string }[];
+  installedApps: { id: string; name: string; icon: string; iconUrl?: string; color: string }[];
 }
 
 export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
@@ -81,8 +81,14 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
             }}
             onContextMenu={(e) => { e.stopPropagation(); handleContextMenu(e, app.id); }}
           >
-            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg mb-1`}>
-              <span className="material-icons text-white text-2xl">{getIconName(app.icon)}</span>
+            <div className={`w-12 h-12 rounded-xl overflow-hidden shadow-lg mb-1`}>
+              {app.iconUrl ? (
+                <img src={app.iconUrl} alt={app.name} className="w-full h-full object-cover scale-105" />
+              ) : (
+                <div className={`w-full h-full bg-gradient-to-br ${app.color} flex items-center justify-center`}>
+                  <span className="material-icons text-white text-2xl">{getIconName(app.icon)}</span>
+                </div>
+              )}
             </div>
             <span className="text-white text-xs text-center leading-tight drop-shadow-lg line-clamp-2">
               {app.name}
