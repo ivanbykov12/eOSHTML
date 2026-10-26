@@ -131,7 +131,7 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock }: La
         {currentApps.length === 0 && (
           <div className="text-center text-white/50 mt-20">
             <span className="material-icons text-6xl mb-4 block">search_off</span>
-            <p>Nothing found</p>
+            <p>Ничего не найдено</p>
           </div>
         )}
       </div>
