@@ -132,19 +132,91 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Control Center */
-.control-center {
-  animation: slideDown 0.2s ease-out;
+/* Control Center - iOS 18 Style */
+.control-center-container {
+  animation: ccOpen 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
-@keyframes slideDown {
+.control-center-container.cc-closing {
+  animation: ccClose 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@keyframes ccOpen {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: scale(0.9) translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes ccClose {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+}
+
+/* Tile animations */
+.cc-tile {
+  transition: transform 0.15s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.cc-tile:active:not(.cc-edit-mode) {
+  transform: scale(0.95);
+}
+
+.cc-tile.cc-edit-mode {
+  animation: ccJiggle 0.3s ease-in-out infinite alternate;
+}
+
+.cc-tile.cc-dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.cc-tile.cc-drag-over {
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+.cc-slider.cc-dragging,
+.cc-media.cc-dragging {
+  opacity: 0.5;
+}
+
+.cc-slider.cc-drag-over,
+.cc-media.cc-drag-over {
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+.cc-remove-btn {
+  animation: ccRemoveAppear 0.2s ease forwards;
+}
+
+.cc-remove-btn:hover {
+  background: rgba(255, 59, 48, 0.8) !important;
+  transform: scale(1.1);
+}
+
+@keyframes ccJiggle {
+  0% { transform: rotate(-0.5deg); }
+  100% { transform: rotate(0.5deg); }
+}
+
+@keyframes ccRemoveAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

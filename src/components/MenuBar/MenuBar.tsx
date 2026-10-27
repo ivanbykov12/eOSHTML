@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import ControlCenter from '../ControlCenter/ControlCenter';
 
 interface MenuBarProps {
   activeWindowTitle: string | null;
@@ -82,12 +83,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
   const spotlightRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  const [wifi, setWifi] = useState(true);
-  const [bluetooth, setBluetooth] = useState(true);
-  const [focusMode, setFocusMode] = useState(false);
-  const [brightness, setBrightness] = useState(100);
-  const [volume, setVolume] = useState(75);
-  const [airplaneMode, setAirplaneMode] = useState(false);
+  // Control Center state moved to ControlCenter component
 
   // Track fullscreen state
   useEffect(() => {
@@ -381,24 +377,20 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
         {/* Right side */}
         <div className="flex items-center gap-2">
           {/* Status Icons */}
-          {!airplaneMode && (
-            <>
-              <span 
-                className={`flex items-center ${wifi ? 'opacity-80' : 'opacity-30'}`} 
-                style={{ color: 'var(--text-primary)' }}
-                title={wifi ? 'Wi-Fi подключено' : 'Wi-Fi отключено'}
-              >
-                <Icons.wifi />
-              </span>
-              <span 
-                className={`flex items-center ${bluetooth ? 'opacity-80' : 'opacity-30'}`} 
-                style={{ color: 'var(--text-primary)' }}
-                title={bluetooth ? 'Bluetooth включен' : 'Bluetooth отключен'}
-              >
-                <Icons.bluetooth />
-              </span>
-            </>
-          )}
+          <span 
+            className="flex items-center opacity-80" 
+            style={{ color: 'var(--text-primary)' }}
+            title="Wi-Fi"
+          >
+            <Icons.wifi />
+          </span>
+          <span 
+            className="flex items-center opacity-80" 
+            style={{ color: 'var(--text-primary)' }}
+            title="Bluetooth"
+          >
+            <Icons.bluetooth />
+          </span>
 
           {/* Battery */}
           <span 
@@ -486,129 +478,13 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
               <Icons.control />
             </button>
 
-            {/* Control Center */}
+            {/* Control Center - iOS 18 Style */}
             {showControlCenter && (
-              <div
-                className="control-center absolute top-8 right-0 z-[9999] w-80 p-4 liquid-glass-heavy rounded-2xl shadow-2xl"
-                style={{ 
-                  background: isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-                  backdropFilter: 'blur(40px) saturate(200%)',
-                  WebkitBackdropFilter: 'blur(40px) saturate(200%)'
-                }}
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  {/* Network */}
-                  <div className="liquid-glass rounded-xl p-3">
-                    <button
-                      className={`flex items-center gap-2 w-full ${wifi ? '' : 'opacity-50'}`}
-                      onClick={() => setWifi(!wifi)}
-                    >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${wifi ? 'bg-blue-500' : 'bg-gray-500'}`}>
-                        <Icons.wifi />
-                      </div>
-                      <div className="text-left">
-                        <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Wi-Fi</div>
-                        <div className="text-[10px] opacity-60" style={{ color: 'var(--text-primary)' }}>{wifi ? 'Домашняя' : 'Выкл.'}</div>
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Bluetooth */}
-                  <div className="liquid-glass rounded-xl p-3">
-                    <button
-                      className={`flex items-center gap-2 w-full ${bluetooth ? '' : 'opacity-50'}`}
-                      onClick={() => setBluetooth(!bluetooth)}
-                    >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${bluetooth ? 'bg-blue-500' : 'bg-gray-500'}`}>
-                        <Icons.bluetooth />
-                      </div>
-                      <div className="text-left">
-                        <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Bluetooth</div>
-                        <div className="text-[10px] opacity-60" style={{ color: 'var(--text-primary)' }}>{bluetooth ? 'Вкл.' : 'Выкл.'}</div>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Airplane Mode */}
-                <div className="liquid-glass rounded-xl p-3 mb-3">
-                  <button
-                    className="flex items-center gap-3 w-full"
-                    onClick={() => {
-                      setAirplaneMode(!airplaneMode);
-                      if (!airplaneMode) {
-                        setWifi(false);
-                        setBluetooth(false);
-                      }
-                    }}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${airplaneMode ? 'bg-orange-500' : 'bg-gray-500'}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-                        <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-                      </svg>
-                    </div>
-                    <div className="text-left">
-                      <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Авиарежим</div>
-                      <div className="text-[10px] opacity-60" style={{ color: 'var(--text-primary)' }}>{airplaneMode ? 'Вкл.' : 'Выкл.'}</div>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Focus */}
-                <div className="liquid-glass rounded-xl p-3 mb-3">
-                  <button
-                    className="flex items-center gap-3 w-full"
-                    onClick={() => setFocusMode(!focusMode)}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${focusMode ? 'bg-purple-500' : 'bg-gray-500'}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                    </div>
-                    <div className="text-left">
-                      <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Фокусирование</div>
-                      <div className="text-[10px] opacity-60" style={{ color: 'var(--text-primary)' }}>{focusMode ? 'Вкл.' : 'Выкл.'}</div>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Display Brightness */}
-                <div className="liquid-glass rounded-xl p-3 mb-3">
-                  <div className="flex items-center gap-3">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-primary)' }}>
-                      <path d="M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
-                    </svg>
-                    <input
-                      type="range"
-                      min="30"
-                      max="100"
-                      value={brightness}
-                      onChange={e => setBrightness(Number(e.target.value))}
-                      className="flex-1 accent-blue-500"
-                    />
-                    <span className="text-xs w-8 text-right" style={{ color: 'var(--text-primary)' }}>{brightness}%</span>
-                  </div>
-                </div>
-
-                {/* Sound */}
-                <div className="liquid-glass rounded-xl p-3">
-                  <div className="flex items-center gap-3">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-primary)' }}>
-                      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                    </svg>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={volume}
-                      onChange={e => setVolume(Number(e.target.value))}
-                      className="flex-1 accent-blue-500"
-                    />
-                    <span className="text-xs w-8 text-right" style={{ color: 'var(--text-primary)' }}>{volume}%</span>
-                  </div>
-                </div>
-              </div>
+              <ControlCenter
+                isDark={isDark}
+                onOpenApp={onOpenApp}
+                onClose={() => setShowControlCenter(false)}
+              />
             )}
           </div>
 
