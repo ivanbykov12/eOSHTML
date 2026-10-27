@@ -63,6 +63,7 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
   const [editMode, setEditMode] = useState(false);
   const [draggedWidget, setDraggedWidget] = useState<WidgetId | null>(null);
   const [dragOverWidget, setDragOverWidget] = useState<WidgetId | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -86,6 +87,23 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, editMode, onClose]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setMousePos({
+          x: (e.clientX - rect.left) / rect.width,
+          y: (e.clientY - rect.top) / rect.height,
+        });
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, [isOpen]);
 
   const toggleWidget = (id: WidgetId) => {
     if (editMode) return;
@@ -165,21 +183,21 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
 
   return (
     <>
-      {/* SVG Filter for Liquid Glass Effect */}
+      {/* SVG Filter for Liquid Glass Distortion */}
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
         <defs>
           <filter id="liquid-glass-distortion">
             <feTurbulence
               type="fractalNoise"
-              baseFrequency="0.01"
-              numOctaves="1"
-              seed="5"
+              baseFrequency="0.015"
+              numOctaves="2"
+              seed={Math.floor(mousePos.x * 10)}
               result="turbulence"
             />
             <feDisplacementMap
               in="SourceGraphic"
               in2="turbulence"
-              scale="8"
+              scale="12"
               xChannelSelector="R"
               yChannelSelector="G"
             />
@@ -197,26 +215,28 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
       {/* Control Center Panel */}
       <div
         ref={containerRef}
-        className={`fixed z-[9999] ${editMode ? 'cc-edit-mode' : ''}`}
+        className={`cc-panel ${editMode ? 'cc-edit-mode' : ''}`}
         style={{
+          position: 'fixed',
           top: '44px',
           right: '12px',
-          width: '340px',
+          width: '360px',
           maxHeight: 'calc(100vh - 80px)',
           overflowY: 'auto',
           background: 'rgba(30, 30, 30, 0.65)',
           backdropFilter: 'blur(40px) saturate(200%) brightness(1.1)',
           WebkitBackdropFilter: 'blur(40px) saturate(200%) brightness(1.1)',
-          borderRadius: '36px',
-          padding: '20px',
+          borderRadius: '40px',
+          padding: '24px',
           border: '1px solid rgba(255, 255, 255, 0.15)',
           boxShadow: `
             0 20px 60px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+            inset 0 1px 0 rgba(255, 255, 255, 0.12),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.15)
           `,
           color: '#f5f5f7',
           animation: 'ccOpen 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+          zIndex: 9999,
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -225,8 +245,8 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '12px',
-            marginBottom: '16px',
+            gap: '16px',
+            marginBottom: '20px',
           }}
         >
           {layout.map(id => {
@@ -265,15 +285,15 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
                 onClick={() => toggleWidget(id)}
                 className={`cc-widget ${editMode ? 'cc-edit-mode' : ''} ${draggedWidget === id ? 'cc-dragging' : ''} ${dragOverWidget === id && draggedWidget !== id ? 'cc-drag-over' : ''}`}
                 style={{
-                  width: '64px',
-                  height: '64px',
+                  width: '70px',
+                  height: '70px',
                   borderRadius: '50%',
                   background: active
                     ? 'linear-gradient(135deg, #0A84FF, #007AFF)'
-                    : 'rgba(255, 255, 255, 0.1)',
+                    : 'rgba(255, 255, 255, 0.08)',
                   border: active
-                    ? '1px solid rgba(255, 255, 255, 0.3)'
-                    : '1px solid rgba(255, 255, 255, 0.05)',
+                    ? '1px solid rgba(255, 255, 255, 0.35)'
+                    : '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -283,14 +303,16 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
                   transition: 'all 0.2s cubic-bezier(0.32, 0.72, 0, 1)',
                   boxShadow: active
                     ? `
-                      0 4px 12px rgba(10, 132, 255, 0.4),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                      inset 0 -1px 0 rgba(0, 0, 0, 0.2)
+                      0 6px 16px rgba(10, 132, 255, 0.5),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+                      inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+                      0 0 0 1px rgba(255, 255, 255, 0.1)
                     `
                     : `
-                      0 2px 8px rgba(0, 0, 0, 0.2),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                      inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+                      0 4px 12px rgba(0, 0, 0, 0.3),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                      inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+                      0 0 0 1px rgba(255, 255, 255, 0.05)
                     `,
                 }}
               >
@@ -303,35 +325,40 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
                     }}
                     style={{
                       position: 'absolute',
-                      top: '-4px',
-                      left: '-4px',
-                      width: '20px',
-                      height: '20px',
+                      top: '-6px',
+                      left: '-6px',
+                      width: '22px',
+                      height: '22px',
                       borderRadius: '50%',
-                      background: 'rgba(0, 0, 0, 0.6)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'rgba(120, 120, 120, 0.6)',
+                      border: '1px solid rgba(255, 255, 255, 0.25)',
                       color: 'white',
-                      fontSize: '14px',
+                      fontSize: '16px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: 'pointer',
                       zIndex: 10,
                       backdropFilter: 'blur(10px)',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
                     }}
                   >
                     −
                   </button>
                 )}
-                <span className="material-icons" style={{ fontSize: '24px', color: 'white' }}>
+                <span className="material-icons" style={{ 
+                  fontSize: '28px', 
+                  color: 'white',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                }}>
                   {widget.icon}
                 </span>
                 <span style={{ 
-                  fontSize: '9px', 
+                  fontSize: '10px', 
                   fontWeight: 500, 
                   color: 'white', 
-                  marginTop: '2px',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                  marginTop: '3px',
+                  textShadow: '0 1px 3px rgba(0,0,0,0.4)'
                 }}>
                   {widget.label}
                 </span>
@@ -342,50 +369,51 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
 
         {/* Edit Mode - Available Widgets */}
         {editMode && availableWidgets.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
+          <div style={{ marginBottom: '20px' }}>
             <div style={{ 
-              fontSize: '11px', 
+              fontSize: '12px', 
               fontWeight: 600, 
-              marginBottom: '8px', 
+              marginBottom: '10px', 
               opacity: 0.6,
               textTransform: 'uppercase',
               letterSpacing: '0.5px'
             }}>
               Доступные виджеты
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {availableWidgets.map(widget => (
                 <div
                   key={widget.id}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
-                    padding: '8px 12px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    gap: '12px',
+                    padding: '10px 14px',
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    borderRadius: '14px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <span className="material-icons" style={{ fontSize: '18px', opacity: 0.7 }}>
+                  <span className="material-icons" style={{ fontSize: '20px', opacity: 0.8 }}>
                     {widget.icon}
                   </span>
-                  <span style={{ flex: 1, fontSize: '12px' }}>{widget.label}</span>
+                  <span style={{ flex: 1, fontSize: '13px' }}>{widget.label}</span>
                   <button
                     onClick={() => addWidget(widget.id)}
                     style={{
-                      width: '22px',
-                      height: '22px',
+                      width: '24px',
+                      height: '24px',
                       borderRadius: '50%',
                       background: '#34c759',
                       border: 'none',
                       color: 'white',
-                      fontSize: '14px',
+                      fontSize: '16px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: 'pointer',
-                      boxShadow: '0 2px 6px rgba(52, 199, 89, 0.4)',
+                      boxShadow: '0 2px 8px rgba(52, 199, 89, 0.5)',
                     }}
                   >
                     +
@@ -402,18 +430,18 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
             onClick={() => setEditMode(!editMode)}
             style={{
               background: editMode ? '#0A84FF' : 'transparent',
-              color: editMode ? 'white' : 'rgba(255, 255, 255, 0.8)',
-              border: editMode ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
+              color: editMode ? 'white' : 'rgba(255, 255, 255, 0.85)',
+              border: editMode ? 'none' : '1px solid rgba(255, 255, 255, 0.25)',
               borderRadius: '999px',
-              padding: '8px 20px',
-              fontSize: '12px',
+              padding: '10px 24px',
+              fontSize: '13px',
               fontWeight: 500,
               cursor: 'pointer',
               transition: 'all 0.2s',
               backdropFilter: editMode ? 'none' : 'blur(10px)',
               boxShadow: editMode
-                ? '0 4px 12px rgba(10, 132, 255, 0.4)'
-                : '0 2px 8px rgba(0, 0, 0, 0.2)',
+                ? '0 4px 16px rgba(10, 132, 255, 0.5)'
+                : '0 2px 8px rgba(0, 0, 0, 0.3)',
             }}
           >
             {editMode ? 'Готово' : 'Изменить виджеты'}
@@ -503,17 +531,18 @@ function LiquidSlider({
       className={`cc-slider ${dragged ? 'cc-dragging' : ''} ${dragOver ? 'cc-drag-over' : ''}`}
       style={{
         gridColumn: 'span 2',
-        height: '140px',
+        height: '64px',
         borderRadius: '999px',
         background: 'rgba(255, 255, 255, 0.08)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
         position: 'relative',
         cursor: editMode ? 'grab' : 'pointer',
         overflow: 'hidden',
         boxShadow: `
           0 4px 12px rgba(0, 0, 0, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+          inset 0 1px 0 rgba(255, 255, 255, 0.15),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+          0 0 0 1px rgba(255, 255, 255, 0.05)
         `,
       }}
     >
@@ -522,21 +551,22 @@ function LiquidSlider({
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
           style={{
             position: 'absolute',
-            top: '4px',
-            left: '4px',
-            width: '20px',
-            height: '20px',
+            top: '6px',
+            left: '6px',
+            width: '22px',
+            height: '22px',
             borderRadius: '50%',
-            background: 'rgba(0, 0, 0, 0.6)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            background: 'rgba(120, 120, 120, 0.6)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
             color: 'white',
-            fontSize: '14px',
+            fontSize: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
             zIndex: 10,
             backdropFilter: 'blur(10px)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
           }}
         >
           −
@@ -551,10 +581,10 @@ function LiquidSlider({
           left: 0,
           right: 0,
           height: `${value}%`,
-          background: 'linear-gradient(to top, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))',
+          background: 'linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75))',
           borderRadius: '999px',
           transition: isDragging ? 'none' : 'height 0.1s ease',
-          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.5)',
+          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.6)',
         }}
       />
       
@@ -578,15 +608,15 @@ function LiquidSlider({
       {/* Top icon */}
       <div style={{
         position: 'absolute',
-        top: '12px',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        top: '50%',
+        left: '16px',
+        transform: 'translateY(-50%)',
         zIndex: 6,
       }}>
         <span className="material-icons" style={{
-          fontSize: '20px',
-          color: value > 50 ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
-          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
+          fontSize: '22px',
+          color: value > 50 ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.95)',
+          filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))',
         }}>
           {endIcon}
         </span>
@@ -595,15 +625,15 @@ function LiquidSlider({
       {/* Bottom icon */}
       <div style={{
         position: 'absolute',
-        bottom: '12px',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        top: '50%',
+        right: '16px',
+        transform: 'translateY(-50%)',
         zIndex: 6,
       }}>
         <span className="material-icons" style={{
-          fontSize: '16px',
-          color: value < 50 ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
-          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
+          fontSize: '18px',
+          color: value < 50 ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.95)',
+          filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))',
         }}>
           {startIcon}
         </span>
