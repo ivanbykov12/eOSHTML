@@ -132,19 +132,11 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Control Center - iOS 18 Style */
-.control-center-container {
-  animation: ccOpen 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-}
-
-.control-center-container.cc-closing {
-  animation: ccClose 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-}
-
+/* Control Center - macOS Tahoe Liquid Glass Style */
 @keyframes ccOpen {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(-10px);
+    transform: scale(0.95) translateY(-8px);
   }
   to {
     opacity: 1;
@@ -159,65 +151,89 @@ body {
   }
   to {
     opacity: 0;
-    transform: scale(0.9) translateY(-10px);
+    transform: scale(0.95) translateY(-8px);
   }
 }
 
-/* Tile animations */
-.cc-tile {
-  transition: transform 0.15s ease, background 0.2s ease, opacity 0.2s ease;
+/* Widget animations */
+.cc-widget {
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.cc-tile:active:not(.cc-edit-mode) {
+.cc-widget:active:not(.cc-edit-mode) {
+  transform: scale(0.92);
+}
+
+.cc-widget.cc-edit-mode {
+  animation: ccJiggle 0.4s ease-in-out infinite alternate;
+}
+
+.cc-widget.cc-dragging {
+  opacity: 0.4;
+  transform: scale(0.9);
+}
+
+.cc-widget.cc-drag-over {
+  border: 2px dashed rgba(10, 132, 255, 0.6) !important;
+  background: rgba(10, 132, 255, 0.1) !important;
+}
+
+/* Slider animations */
+.cc-slider {
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.cc-slider.cc-dragging {
+  opacity: 0.4;
   transform: scale(0.95);
 }
 
-.cc-tile.cc-edit-mode {
-  animation: ccJiggle 0.3s ease-in-out infinite alternate;
+.cc-slider.cc-drag-over {
+  border: 2px dashed rgba(10, 132, 255, 0.6) !important;
 }
 
-.cc-tile.cc-dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
-}
-
-.cc-tile.cc-drag-over {
-  border: 2px dashed rgba(255, 255, 255, 0.5);
-}
-
-.cc-slider.cc-dragging,
-.cc-media.cc-dragging {
-  opacity: 0.5;
-}
-
-.cc-slider.cc-drag-over,
-.cc-media.cc-drag-over {
-  border: 2px dashed rgba(255, 255, 255, 0.5);
-}
-
+/* Remove button */
 .cc-remove-btn {
-  animation: ccRemoveAppear 0.2s ease forwards;
+  animation: ccRemoveAppear 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  transition: all 0.15s ease;
 }
 
 .cc-remove-btn:hover {
-  background: rgba(255, 59, 48, 0.8) !important;
-  transform: scale(1.1);
+  background: rgba(255, 59, 48, 0.9) !important;
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.5);
+}
+
+.cc-remove-btn:active {
+  transform: scale(0.95);
 }
 
 @keyframes ccJiggle {
-  0% { transform: rotate(-0.5deg); }
-  100% { transform: rotate(0.5deg); }
+  0% { transform: rotate(-0.8deg) scale(1); }
+  100% { transform: rotate(0.8deg) scale(1.02); }
 }
 
 @keyframes ccRemoveAppear {
   from {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scale(0.3);
   }
   to {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Liquid Glass Panel hover effects */
+.cc-panel {
+  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.cc-panel:hover {
+  box-shadow: 
+    0 24px 70px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
 }
 
 /* OOBE Animations */

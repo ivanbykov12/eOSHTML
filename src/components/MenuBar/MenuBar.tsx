@@ -478,11 +478,10 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
               <Icons.control />
             </button>
 
-            {/* Control Center - iOS 18 Style */}
+            {/* Control Center - macOS Tahoe Liquid Glass Style */}
             {showControlCenter && (
               <ControlCenter
-                isDark={isDark}
-                onOpenApp={onOpenApp}
+                isOpen={showControlCenter}
                 onClose={() => setShowControlCenter(false)}
               />
             )}

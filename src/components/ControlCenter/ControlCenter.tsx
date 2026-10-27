@@ -1,36 +1,40 @@
 import { useState, useEffect, useRef } from 'react';
 
 interface ControlCenterProps {
-  isDark: boolean;
-  onOpenApp?: (appId: string) => void;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-type WidgetId = 'wifi' | 'bluetooth' | 'airplane' | 'focus' | 'mirror' | 'brightness' | 'volume' | 'media' | 'timer' | 'calculator' | 'camera' | 'screenshot' | 'notes' | 'clock';
+type WidgetId = 'wifi' | 'bluetooth' | 'airplane' | 'focus' | 'brightness' | 'volume' | 'timer' | 'calculator' | 'camera' | 'screenshot';
+
+interface WidgetState {
+  wifi: boolean;
+  bluetooth: boolean;
+  airplane: boolean;
+  focus: boolean;
+  brightness: number;
+  volume: number;
+}
 
 interface WidgetConfig {
   id: WidgetId;
-  type: 'small' | 'medium' | 'slider';
-  name: string;
   icon: string;
+  label: string;
+  type: 'toggle' | 'slider' | 'action';
 }
 
-const ALL_WIDGETS: Record<WidgetId, WidgetConfig> = {
-  wifi: { id: 'wifi', type: 'small', name: 'Wi-Fi', icon: 'wifi' },
-  bluetooth: { id: 'bluetooth', type: 'small', name: 'Bluetooth', icon: 'bluetooth' },
-  airplane: { id: 'airplane', type: 'small', name: 'Airplane', icon: 'airplanemode_active' },
-  focus: { id: 'focus', type: 'small', name: 'Focus', icon: 'do_not_disturb_on' },
-  mirror: { id: 'mirror', type: 'small', name: 'Mirror', icon: 'screen_share' },
-  brightness: { id: 'brightness', type: 'slider', name: 'Brightness', icon: 'brightness_high' },
-  volume: { id: 'volume', type: 'slider', name: 'Volume', icon: 'volume_up' },
-  media: { id: 'media', type: 'medium', name: 'Media', icon: 'music_note' },
-  timer: { id: 'timer', type: 'small', name: 'Timer', icon: 'timer' },
-  calculator: { id: 'calculator', type: 'small', name: 'Calc', icon: 'calculate' },
-  camera: { id: 'camera', type: 'small', name: 'Camera', icon: 'photo_camera' },
-  screenshot: { id: 'screenshot', type: 'small', name: 'Screenshot', icon: 'screenshot_monitor' },
-  notes: { id: 'notes', type: 'small', name: 'Notes', icon: 'note' },
-  clock: { id: 'clock', type: 'small', name: 'Clock', icon: 'schedule' },
-};
+const ALL_WIDGETS: WidgetConfig[] = [
+  { id: 'wifi', icon: 'wifi', label: 'Wi-Fi', type: 'toggle' },
+  { id: 'bluetooth', icon: 'bluetooth', label: 'Bluetooth', type: 'toggle' },
+  { id: 'airplane', icon: 'airplanemode_active', label: 'Airplane', type: 'toggle' },
+  { id: 'focus', icon: 'do_not_disturb_on', label: 'Focus', type: 'toggle' },
+  { id: 'brightness', icon: 'brightness_high', label: 'Brightness', type: 'slider' },
+  { id: 'volume', icon: 'volume_up', label: 'Volume', type: 'slider' },
+  { id: 'timer', icon: 'timer', label: 'Timer', type: 'action' },
+  { id: 'calculator', icon: 'calculate', label: 'Calculator', type: 'action' },
+  { id: 'camera', icon: 'photo_camera', label: 'Camera', type: 'action' },
+  { id: 'screenshot', icon: 'screenshot_monitor', label: 'Screenshot', type: 'action' },
+];
 
 const DEFAULT_LAYOUT: WidgetId[] = [
   'wifi', 'bluetooth', 'airplane', 'focus',
@@ -38,131 +42,72 @@ const DEFAULT_LAYOUT: WidgetId[] = [
   'timer', 'calculator', 'camera', 'screenshot'
 ];
 
-const STORAGE_KEY = 'eos_cc_layout';
-const STATE_KEY = 'eos_cc_state';
-
-interface WidgetState {
-  wifi: boolean;
-  bluetooth: boolean;
-  airplane: boolean;
-  focus: boolean;
-  mirror: boolean;
-  brightness: number;
-  volume: number;
-}
-
-export default function ControlCenter({ isDark, onOpenApp, onClose }: ControlCenterProps) {
+export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
   const [layout, setLayout] = useState<WidgetId[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_LAYOUT;
-    } catch {
-      return DEFAULT_LAYOUT;
-    }
+    const saved = localStorage.getItem('eos_cc_layout');
+    return saved ? JSON.parse(saved) : DEFAULT_LAYOUT;
   });
 
   const [widgetState, setWidgetState] = useState<WidgetState>(() => {
-    try {
-      const saved = localStorage.getItem(STATE_KEY);
-      return saved ? JSON.parse(saved) : {
-        wifi: true,
-        bluetooth: true,
-        airplane: false,
-        focus: false,
-        mirror: false,
-        brightness: 100,
-        volume: 75,
-      };
-    } catch {
-      return {
-        wifi: true,
-        bluetooth: true,
-        airplane: false,
-        focus: false,
-        mirror: false,
-        brightness: 100,
-        volume: 75,
-      };
-    }
+    const saved = localStorage.getItem('eos_cc_state');
+    return saved ? JSON.parse(saved) : {
+      wifi: true,
+      bluetooth: true,
+      airplane: false,
+      focus: false,
+      brightness: 80,
+      volume: 60,
+    };
   });
 
   const [editMode, setEditMode] = useState(false);
   const [draggedWidget, setDraggedWidget] = useState<WidgetId | null>(null);
   const [dragOverWidget, setDragOverWidget] = useState<WidgetId | null>(null);
-  const [closing, setClosing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Save layout to localStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
+    localStorage.setItem('eos_cc_layout', JSON.stringify(layout));
   }, [layout]);
 
-  // Save state to localStorage
   useEffect(() => {
-    localStorage.setItem(STATE_KEY, JSON.stringify(widgetState));
+    localStorage.setItem('eos_cc_state', JSON.stringify(widgetState));
   }, [widgetState]);
 
-  // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [editMode]);
-
-  // Close on click outside
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        handleClose();
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        if (editMode) {
+          setEditMode(false);
+        } else {
+          onClose();
+        }
       }
     };
-    // Delay to avoid immediate close
-    const timer = setTimeout(() => {
-      document.addEventListener('mousedown', handler);
-    }, 100);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('mousedown', handler);
-    };
-  }, []);
-
-  const handleClose = () => {
-    setClosing(true);
-    setTimeout(() => onClose(), 200);
-  };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, editMode, onClose]);
 
   const toggleWidget = (id: WidgetId) => {
     if (editMode) return;
     
     setWidgetState(prev => {
       const newState = { ...prev };
-      if (id === 'wifi') {
-        newState.wifi = !prev.wifi;
-        if (newState.wifi) newState.airplane = false;
-      } else if (id === 'bluetooth') {
-        newState.bluetooth = !prev.bluetooth;
-        if (newState.bluetooth) newState.airplane = false;
-      } else if (id === 'airplane') {
+      if (id === 'wifi') newState.wifi = !prev.wifi;
+      if (id === 'bluetooth') newState.bluetooth = !prev.bluetooth;
+      if (id === 'airplane') {
         newState.airplane = !prev.airplane;
         if (newState.airplane) {
           newState.wifi = false;
           newState.bluetooth = false;
         }
-      } else if (id === 'focus') {
-        newState.focus = !prev.focus;
-      } else if (id === 'mirror') {
-        newState.mirror = !prev.mirror;
       }
+      if (id === 'focus') newState.focus = !prev.focus;
       return newState;
     });
   };
 
-  const openAppWidget = (appId: string) => {
-    if (editMode) return;
-    if (onOpenApp) onOpenApp(appId);
-    handleClose();
+  const updateSlider = (id: 'brightness' | 'volume', value: number) => {
+    setWidgetState(prev => ({ ...prev, [id]: value }));
   };
 
   const removeWidget = (id: WidgetId) => {
@@ -206,278 +151,284 @@ export default function ControlCenter({ isDark, onOpenApp, onClose }: ControlCen
     setDragOverWidget(null);
   };
 
-  const availableWidgets = (Object.keys(ALL_WIDGETS) as WidgetId[]).filter(
-    id => !layout.includes(id)
-  );
+  const availableWidgets = ALL_WIDGETS.filter(w => !layout.includes(w.id));
 
-  const isActive = (id: WidgetId): boolean => {
+  const isWidgetActive = (id: WidgetId): boolean => {
     if (id === 'wifi') return widgetState.wifi;
     if (id === 'bluetooth') return widgetState.bluetooth;
     if (id === 'airplane') return widgetState.airplane;
     if (id === 'focus') return widgetState.focus;
-    if (id === 'mirror') return widgetState.mirror;
     return false;
   };
 
-  const getWidgetStatus = (id: WidgetId): string => {
-    if (id === 'wifi') return widgetState.wifi ? 'Домашняя' : 'Выкл.';
-    if (id === 'bluetooth') return widgetState.bluetooth ? 'Вкл.' : 'Выкл.';
-    if (id === 'airplane') return widgetState.airplane ? 'Вкл.' : 'Выкл.';
-    if (id === 'focus') return widgetState.focus ? 'Не беспокоить' : 'Выкл.';
-    if (id === 'mirror') return widgetState.mirror ? 'Подключено' : 'Выкл.';
-    return '';
-  };
-
-  const handleSliderChange = (id: 'brightness' | 'volume', value: number) => {
-    setWidgetState(prev => ({ ...prev, [id]: value }));
-  };
-
-  const getGridSpan = (widget: WidgetConfig): string => {
-    if (widget.type === 'medium') return 'span 2';
-    return 'span 1';
-  };
+  if (!isOpen) return null;
 
   return (
-    <div
-      ref={containerRef}
-      className={`control-center-container ${closing ? 'cc-closing' : 'cc-opening'}`}
-      style={{
-        position: 'fixed',
-        top: '36px',
-        right: '8px',
-        width: 'min(340px, 90vw)',
-        maxHeight: 'calc(100vh - 60px)',
-        overflowY: 'auto',
-        zIndex: 9999,
-        background: isDark ? 'rgba(30, 30, 30, 0.75)' : 'rgba(255, 255, 255, 0.75)',
-        backdropFilter: 'blur(40px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-        borderRadius: '32px',
-        padding: '16px',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-        border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.4)'}`,
-        color: isDark ? '#f5f5f7' : '#1d1d1f',
-        transformOrigin: 'top right',
-      }}
-      onClick={e => e.stopPropagation()}
-    >
-      {/* Main Grid */}
+    <>
+      {/* SVG Filter for Liquid Glass Effect */}
+      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+        <defs>
+          <filter id="liquid-glass-distortion">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.01"
+              numOctaves="1"
+              seed="5"
+              result="turbulence"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="turbulence"
+              scale="8"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* Backdrop */}
       <div
+        className="fixed inset-0 z-[9998]"
+        onClick={onClose}
+        style={{ background: 'transparent' }}
+      />
+
+      {/* Control Center Panel */}
+      <div
+        ref={containerRef}
+        className={`fixed z-[9999] ${editMode ? 'cc-edit-mode' : ''}`}
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '12px',
+          top: '44px',
+          right: '12px',
+          width: '340px',
+          maxHeight: 'calc(100vh - 80px)',
+          overflowY: 'auto',
+          background: 'rgba(30, 30, 30, 0.65)',
+          backdropFilter: 'blur(40px) saturate(200%) brightness(1.1)',
+          WebkitBackdropFilter: 'blur(40px) saturate(200%) brightness(1.1)',
+          borderRadius: '36px',
+          padding: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          boxShadow: `
+            0 20px 60px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+          `,
+          color: '#f5f5f7',
+          animation: 'ccOpen 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
         }}
+        onClick={e => e.stopPropagation()}
       >
-        {layout.map(id => {
-          const widget = ALL_WIDGETS[id];
-          if (!widget) return null;
+        {/* Widget Grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '12px',
+            marginBottom: '16px',
+          }}
+        >
+          {layout.map(id => {
+            const widget = ALL_WIDGETS.find(w => w.id === id);
+            if (!widget) return null;
 
-          if (widget.type === 'slider') {
-            return (
-              <SliderWidget
-                key={id}
-                widget={widget}
-                value={widgetState[id as 'brightness' | 'volume']}
-                onChange={(v) => handleSliderChange(id as 'brightness' | 'volume', v)}
-                isDark={isDark}
-                editMode={editMode}
-                onRemove={() => removeWidget(id)}
-                dragged={draggedWidget === id}
-                dragOver={dragOverWidget === id}
-                onDragStart={() => handleDragStart(id)}
-                onDragOver={(e) => handleDragOver(e, id)}
-                onDrop={() => handleDrop(id)}
-                onDragEnd={handleDragEnd}
-              />
-            );
-          }
-
-          if (widget.type === 'medium' && id === 'media') {
-            return (
-              <MediaWidget
-                key={id}
-                isDark={isDark}
-                editMode={editMode}
-                onRemove={() => removeWidget(id)}
-                dragged={draggedWidget === id}
-                dragOver={dragOverWidget === id}
-                onDragStart={() => handleDragStart(id)}
-                onDragOver={(e) => handleDragOver(e, id)}
-                onDrop={() => handleDrop(id)}
-                onDragEnd={handleDragEnd}
-              />
-            );
-          }
-
-          const active = isActive(id);
-          const isToggle = ['wifi', 'bluetooth', 'airplane', 'focus', 'mirror'].includes(id);
-          const isApp = ['timer', 'calculator', 'camera', 'screenshot', 'notes', 'clock'].includes(id);
-
-          return (
-            <div
-              key={id}
-              draggable={editMode}
-              onDragStart={() => handleDragStart(id)}
-              onDragOver={(e) => handleDragOver(e, id)}
-              onDrop={() => handleDrop(id)}
-              onDragEnd={handleDragEnd}
-              onClick={() => {
-                if (isToggle) toggleWidget(id);
-                else if (isApp) {
-                  const appMap: Record<string, string> = {
-                    timer: 'clock_desktop',
-                    calculator: 'calculator_desktop',
-                    camera: 'photos_desktop',
-                    screenshot: 'photos_desktop',
-                    notes: 'notes_desktop',
-                    clock: 'clock_desktop',
-                  };
-                  openAppWidget(appMap[id] || '');
-                }
-              }}
-              className={`cc-tile ${editMode ? 'cc-edit-mode' : ''} ${draggedWidget === id ? 'cc-dragging' : ''} ${dragOverWidget === id && draggedWidget !== id ? 'cc-drag-over' : ''}`}
-              style={{
-                gridColumn: getGridSpan(widget),
-                background: active
-                  ? (id === 'airplane' ? '#ff9500' : id === 'focus' ? '#af52de' : '#0A84FF')
-                  : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'),
-                borderRadius: '16px',
-                padding: '12px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                cursor: editMode ? 'grab' : 'pointer',
-                transition: 'all 0.2s ease',
-                position: 'relative',
-                minHeight: '70px',
-                userSelect: 'none',
-              }}
-            >
-              {editMode && (
-                <button
-                  className="cc-remove-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeWidget(id);
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: '-6px',
-                    left: '-6px',
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    background: 'rgba(0,0,0,0.6)',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    zIndex: 10,
-                  }}
-                >
-                  −
-                </button>
-              )}
-              <span className="material-icons" style={{ fontSize: '24px', color: 'white' }}>
-                {widget.icon}
-              </span>
-              <span style={{ fontSize: '11px', fontWeight: 600, color: 'white', textAlign: 'center' }}>
-                {widget.name}
-              </span>
-              {isToggle && (
-                <span style={{ fontSize: '10px', color: 'white', opacity: 0.7, textAlign: 'center' }}>
-                  {getWidgetStatus(id)}
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Edit Mode - Available Widgets */}
-      {editMode && availableWidgets.length > 0 && (
-        <div style={{ marginTop: '16px' }}>
-          <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', opacity: 0.7 }}>
-            Доступные виджеты
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {availableWidgets.map(id => {
-              const widget = ALL_WIDGETS[id];
+            if (widget.type === 'slider') {
               return (
-                <div
+                <LiquidSlider
                   key={id}
+                  widget={widget}
+                  value={widgetState[id as 'brightness' | 'volume']}
+                  onChange={(v) => updateSlider(id as 'brightness' | 'volume', v)}
+                  editMode={editMode}
+                  onRemove={() => removeWidget(id)}
+                  dragged={draggedWidget === id}
+                  dragOver={dragOverWidget === id}
+                  onDragStart={() => handleDragStart(id)}
+                  onDragOver={(e) => handleDragOver(e, id)}
+                  onDrop={() => handleDrop(id)}
+                  onDragEnd={handleDragEnd}
+                />
+              );
+            }
+
+            const active = isWidgetActive(id);
+
+            return (
+              <div
+                key={id}
+                draggable={editMode}
+                onDragStart={() => handleDragStart(id)}
+                onDragOver={(e) => handleDragOver(e, id)}
+                onDrop={() => handleDrop(id)}
+                onDragEnd={handleDragEnd}
+                onClick={() => toggleWidget(id)}
+                className={`cc-widget ${editMode ? 'cc-edit-mode' : ''} ${draggedWidget === id ? 'cc-dragging' : ''} ${dragOverWidget === id && draggedWidget !== id ? 'cc-drag-over' : ''}`}
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: active
+                    ? 'linear-gradient(135deg, #0A84FF, #007AFF)'
+                    : 'rgba(255, 255, 255, 0.1)',
+                  border: active
+                    ? '1px solid rgba(255, 255, 255, 0.3)'
+                    : '1px solid rgba(255, 255, 255, 0.05)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: editMode ? 'grab' : 'pointer',
+                  position: 'relative',
+                  transition: 'all 0.2s cubic-bezier(0.32, 0.72, 0, 1)',
+                  boxShadow: active
+                    ? `
+                      0 4px 12px rgba(10, 132, 255, 0.4),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                      inset 0 -1px 0 rgba(0, 0, 0, 0.2)
+                    `
+                    : `
+                      0 2px 8px rgba(0, 0, 0, 0.2),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                      inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+                    `,
+                }}
+              >
+                {editMode && (
+                  <button
+                    className="cc-remove-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeWidget(id);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '-4px',
+                      left: '-4px',
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      background: 'rgba(0, 0, 0, 0.6)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      color: 'white',
+                      fontSize: '14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      zIndex: 10,
+                      backdropFilter: 'blur(10px)',
+                    }}
+                  >
+                    −
+                  </button>
+                )}
+                <span className="material-icons" style={{ fontSize: '24px', color: 'white' }}>
+                  {widget.icon}
+                </span>
+                <span style={{ 
+                  fontSize: '9px', 
+                  fontWeight: 500, 
+                  color: 'white', 
+                  marginTop: '2px',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}>
+                  {widget.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Edit Mode - Available Widgets */}
+        {editMode && availableWidgets.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ 
+              fontSize: '11px', 
+              fontWeight: 600, 
+              marginBottom: '8px', 
+              opacity: 0.6,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Доступные виджеты
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {availableWidgets.map(widget => (
+                <div
+                  key={widget.id}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
                     padding: '8px 12px',
-                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-                    borderRadius: '10px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
                   }}
                 >
-                  <span className="material-icons" style={{ fontSize: '20px', opacity: 0.7 }}>
+                  <span className="material-icons" style={{ fontSize: '18px', opacity: 0.7 }}>
                     {widget.icon}
                   </span>
-                  <span style={{ flex: 1, fontSize: '13px' }}>{widget.name}</span>
+                  <span style={{ flex: 1, fontSize: '12px' }}>{widget.label}</span>
                   <button
-                    onClick={() => addWidget(id)}
+                    onClick={() => addWidget(widget.id)}
                     style={{
-                      width: '24px',
-                      height: '24px',
+                      width: '22px',
+                      height: '22px',
                       borderRadius: '50%',
                       background: '#34c759',
                       border: 'none',
                       color: 'white',
-                      fontSize: '16px',
+                      fontSize: '14px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: 'pointer',
+                      boxShadow: '0 2px 6px rgba(52, 199, 89, 0.4)',
                     }}
                   >
                     +
                   </button>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Edit Controls Button */}
-      <div style={{ marginTop: '16px', textAlign: 'center' }}>
-        <button
-          onClick={() => setEditMode(!editMode)}
-          style={{
-            background: editMode ? '#0A84FF' : 'transparent',
-            color: editMode ? 'white' : (isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)'),
-            border: editMode ? 'none' : `1px solid ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
-            borderRadius: '20px',
-            padding: '6px 16px',
-            fontSize: '13px',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-        >
-          {editMode ? 'Готово' : 'Изменить виджеты'}
-        </button>
+        {/* Edit Controls Button */}
+        <div style={{ textAlign: 'center' }}>
+          <button
+            onClick={() => setEditMode(!editMode)}
+            style={{
+              background: editMode ? '#0A84FF' : 'transparent',
+              color: editMode ? 'white' : 'rgba(255, 255, 255, 0.8)',
+              border: editMode ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '999px',
+              padding: '8px 20px',
+              fontSize: '12px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              backdropFilter: editMode ? 'none' : 'blur(10px)',
+              boxShadow: editMode
+                ? '0 4px 12px rgba(10, 132, 255, 0.4)'
+                : '0 2px 8px rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            {editMode ? 'Готово' : 'Изменить виджеты'}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-// Slider Widget Component
-function SliderWidget({
+// Liquid Slider Component
+function LiquidSlider({
   widget,
   value,
   onChange,
-  isDark,
   editMode,
   onRemove,
   dragged,
@@ -490,7 +441,6 @@ function SliderWidget({
   widget: WidgetConfig;
   value: number;
   onChange: (v: number) => void;
-  isDark: boolean;
   editMode: boolean;
   onRemove: () => void;
   dragged: boolean;
@@ -553,13 +503,18 @@ function SliderWidget({
       className={`cc-slider ${dragged ? 'cc-dragging' : ''} ${dragOver ? 'cc-drag-over' : ''}`}
       style={{
         gridColumn: 'span 2',
-        background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
-        borderRadius: '16px',
-        padding: '8px',
+        height: '140px',
+        borderRadius: '999px',
+        background: 'rgba(255, 255, 255, 0.08)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         position: 'relative',
         cursor: editMode ? 'grab' : 'pointer',
-        transition: dragged ? 'none' : 'all 0.2s',
-        minHeight: '140px',
+        overflow: 'hidden',
+        boxShadow: `
+          0 4px 12px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+        `,
       }}
     >
       {editMode && (
@@ -567,13 +522,13 @@ function SliderWidget({
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
           style={{
             position: 'absolute',
-            top: '-6px',
-            left: '-6px',
+            top: '4px',
+            left: '4px',
             width: '20px',
             height: '20px',
             borderRadius: '50%',
-            background: 'rgba(0,0,0,0.6)',
-            border: 'none',
+            background: 'rgba(0, 0, 0, 0.6)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             color: 'white',
             fontSize: '14px',
             display: 'flex',
@@ -581,11 +536,29 @@ function SliderWidget({
             justifyContent: 'center',
             cursor: 'pointer',
             zIndex: 10,
+            backdropFilter: 'blur(10px)',
           }}
         >
           −
         </button>
       )}
+      
+      {/* Fill */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: `${value}%`,
+          background: 'linear-gradient(to top, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))',
+          borderRadius: '999px',
+          transition: isDragging ? 'none' : 'height 0.1s ease',
+          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.5)',
+        }}
+      />
+      
+      {/* Interactive area */}
       <div
         ref={sliderRef}
         onMouseDown={handleMouseDown}
@@ -596,193 +569,44 @@ function SliderWidget({
           }
         }}
         style={{
-          width: '100%',
-          height: '100%',
-          minHeight: '120px',
-          borderRadius: '12px',
-          background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-          position: 'relative',
-          overflow: 'hidden',
+          position: 'absolute',
+          inset: 0,
+          zIndex: 5,
         }}
-      >
-        {/* Fill */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: `${value}%`,
-            background: isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.7)',
-            borderRadius: '12px',
-            transition: isDragging ? 'none' : 'height 0.1s ease',
-          }}
-        />
-        {/* Top icon */}
-        <div style={{
-          position: 'absolute',
-          top: '8px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2,
+      />
+      
+      {/* Top icon */}
+      <div style={{
+        position: 'absolute',
+        top: '12px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 6,
+      }}>
+        <span className="material-icons" style={{
+          fontSize: '20px',
+          color: value > 50 ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
         }}>
-          <span className="material-icons" style={{
-            fontSize: '20px',
-            color: value > 50 ? (isDark ? '#333' : '#fff') : (isDark ? '#fff' : '#333'),
-          }}>
-            {endIcon}
-          </span>
-        </div>
-        {/* Bottom icon */}
-        <div style={{
-          position: 'absolute',
-          bottom: '8px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2,
-        }}>
-          <span className="material-icons" style={{
-            fontSize: '16px',
-            color: value < 50 ? (isDark ? '#333' : '#fff') : (isDark ? '#fff' : '#333'),
-          }}>
-            {startIcon}
-          </span>
-        </div>
+          {endIcon}
+        </span>
       </div>
-    </div>
-  );
-}
-
-// Media Widget Component
-function MediaWidget({
-  isDark,
-  editMode,
-  onRemove,
-  dragged,
-  dragOver,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  onDragEnd,
-}: {
-  isDark: boolean;
-  editMode: boolean;
-  onRemove: () => void;
-  dragged: boolean;
-  dragOver: boolean;
-  onDragStart: () => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDrop: () => void;
-  onDragEnd: () => void;
-}) {
-  const [playing, setPlaying] = useState(false);
-
-  return (
-    <div
-      draggable={editMode}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      onDragEnd={onDragEnd}
-      className={`cc-media ${dragged ? 'cc-dragging' : ''} ${dragOver ? 'cc-drag-over' : ''}`}
-      style={{
-        gridColumn: 'span 2',
-        background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
-        borderRadius: '16px',
-        padding: '12px',
-        position: 'relative',
-        cursor: editMode ? 'grab' : 'default',
-        minHeight: '70px',
-      }}
-    >
-      {editMode && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          style={{
-            position: 'absolute',
-            top: '-6px',
-            left: '-6px',
-            width: '20px',
-            height: '20px',
-            borderRadius: '50%',
-            background: 'rgba(0,0,0,0.6)',
-            border: 'none',
-            color: 'white',
-            fontSize: '14px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            zIndex: 10,
-          }}
-        >
-          −
-        </button>
-      )}
-      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        {/* Album art placeholder */}
-        <div style={{
-          width: '44px',
-          height: '44px',
-          borderRadius: '8px',
-          background: 'linear-gradient(135deg, #ff6b6b, #ee5a24)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
+      
+      {/* Bottom icon */}
+      <div style={{
+        position: 'absolute',
+        bottom: '12px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 6,
+      }}>
+        <span className="material-icons" style={{
+          fontSize: '16px',
+          color: value < 50 ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
         }}>
-          <span className="material-icons" style={{ color: 'white', fontSize: '20px' }}>music_note</span>
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            Не воспроизводится
-          </div>
-          <div style={{ fontSize: '10px', opacity: 0.6 }}>
-            Откройте Music
-          </div>
-        </div>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
-        <button
-          onClick={() => !editMode && setPlaying(!playing)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'inherit',
-            cursor: 'pointer',
-            padding: '4px',
-            opacity: 0.7,
-          }}
-        >
-          <span className="material-icons" style={{ fontSize: '20px' }}>skip_previous</span>
-        </button>
-        <button
-          onClick={() => !editMode && setPlaying(!playing)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'inherit',
-            cursor: 'pointer',
-            padding: '4px',
-          }}
-        >
-          <span className="material-icons" style={{ fontSize: '24px' }}>
-            {playing ? 'pause' : 'play_arrow'}
-          </span>
-        </button>
-        <button
-          onClick={() => !editMode && setPlaying(!playing)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'inherit',
-            cursor: 'pointer',
-            padding: '4px',
-            opacity: 0.7,
-          }}
-        >
-          <span className="material-icons" style={{ fontSize: '20px' }}>skip_next</span>
-        </button>
+          {startIcon}
+        </span>
       </div>
     </div>
   );
