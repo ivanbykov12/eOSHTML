@@ -205,13 +205,6 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
         </defs>
       </svg>
 
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[9998]"
-        onClick={onClose}
-        style={{ background: 'transparent' }}
-      />
-
       {/* Control Center Panel */}
       <div
         ref={containerRef}
@@ -481,10 +474,10 @@ function LiquidSlider({
   const sliderRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleInteraction = (clientY: number) => {
+  const handleInteraction = (clientX: number) => {
     if (!sliderRef.current || editMode) return;
     const rect = sliderRef.current.getBoundingClientRect();
-    const percent = 1 - (clientY - rect.top) / rect.height;
+    const percent = (clientX - rect.left) / rect.width;
     const clamped = Math.max(0, Math.min(100, Math.round(percent * 100)));
     onChange(clamped);
   };
@@ -492,16 +485,16 @@ function LiquidSlider({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (editMode) return;
     setIsDragging(true);
-    handleInteraction(e.clientY);
+    handleInteraction(e.clientX);
   };
 
   useEffect(() => {
     if (!isDragging) return;
     
-    const handleMouseMove = (e: MouseEvent) => handleInteraction(e.clientY);
+    const handleMouseMove = (e: MouseEvent) => handleInteraction(e.clientX);
     const handleMouseUp = () => setIsDragging(false);
     const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches[0]) handleInteraction(e.touches[0].clientY);
+      if (e.touches[0]) handleInteraction(e.touches[0].clientX);
     };
     const handleTouchEnd = () => setIsDragging(false);
 
@@ -530,8 +523,8 @@ function LiquidSlider({
       onDragEnd={onDragEnd}
       className={`cc-slider ${dragged ? 'cc-dragging' : ''} ${dragOver ? 'cc-drag-over' : ''}`}
       style={{
-        gridColumn: 'span 2',
-        height: '64px',
+        gridColumn: 'span 4',
+        height: '56px',
         borderRadius: '999px',
         background: 'rgba(255, 255, 255, 0.08)',
         border: '1px solid rgba(255, 255, 255, 0.12)',
@@ -577,14 +570,16 @@ function LiquidSlider({
       <div
         style={{
           position: 'absolute',
-          bottom: 0,
+          top: 0,
           left: 0,
-          right: 0,
-          height: `${value}%`,
-          background: 'linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75))',
+          bottom: 0,
+          width: `${value}%`,
+          background: widget.id === 'volume' 
+            ? 'linear-gradient(to right, #0A84FF, #007AFF)'
+            : 'linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85))',
           borderRadius: '999px',
-          transition: isDragging ? 'none' : 'height 0.1s ease',
-          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+          transition: isDragging ? 'none' : 'width 0.1s ease',
+          boxShadow: 'inset 1px 0 0 rgba(255, 255, 255, 0.6)',
         }}
       />
       
@@ -595,7 +590,7 @@ function LiquidSlider({
         onTouchStart={(e) => {
           if (!editMode && e.touches[0]) {
             setIsDragging(true);
-            handleInteraction(e.touches[0].clientY);
+            handleInteraction(e.touches[0].clientX);
           }
         }}
         style={{
@@ -605,37 +600,39 @@ function LiquidSlider({
         }}
       />
       
-      {/* Top icon */}
+      {/* Left icon (min) */}
       <div style={{
         position: 'absolute',
         top: '50%',
         left: '16px',
         transform: 'translateY(-50%)',
         zIndex: 6,
+        pointerEvents: 'none',
       }}>
         <span className="material-icons" style={{
-          fontSize: '22px',
-          color: value > 50 ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.95)',
+          fontSize: '20px',
+          color: 'rgba(255, 255, 255, 0.9)',
           filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))',
         }}>
-          {endIcon}
+          {startIcon}
         </span>
       </div>
       
-      {/* Bottom icon */}
+      {/* Right icon (max) */}
       <div style={{
         position: 'absolute',
         top: '50%',
         right: '16px',
         transform: 'translateY(-50%)',
         zIndex: 6,
+        pointerEvents: 'none',
       }}>
         <span className="material-icons" style={{
-          fontSize: '18px',
-          color: value < 50 ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.95)',
+          fontSize: '22px',
+          color: 'rgba(255, 255, 255, 0.9)',
           filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))',
         }}>
-          {startIcon}
+          {endIcon}
         </span>
       </div>
     </div>
