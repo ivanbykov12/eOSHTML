@@ -183,6 +183,14 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
       if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
         setShowCalendar(false);
       }
+      
+      // Close all dropdown menus
+      const dropdowns = document.querySelectorAll('.liquid-glass-heavy[style*="display: block"]');
+      dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(e.target as Node)) {
+          (dropdown as HTMLElement).style.display = 'none';
+        }
+      });
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -399,9 +407,147 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
           </span>
 
           {/* Menu Items */}
-          <span className="text-sm opacity-70" style={{ color: 'var(--text-primary)' }}>Файл</span>
-          <span className="text-sm opacity-70" style={{ color: 'var(--text-primary)' }}>Правка</span>
-          <span className="text-sm opacity-70" style={{ color: 'var(--text-primary)' }}>Вид</span>
+          <div className="relative">
+            <button
+              className="text-sm opacity-70 hover:opacity-100 px-2 py-0.5 rounded hover:bg-white/10 transition-all"
+              style={{ color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                // Toggle file menu
+                const menu = e.currentTarget.nextElementSibling as HTMLElement;
+                if (menu) {
+                  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                }
+              }}
+            >
+              Файл
+            </button>
+            <div
+              className="absolute top-7 left-0 liquid-glass-heavy rounded-xl py-2 min-w-[180px] shadow-2xl"
+              style={{
+                display: 'none',
+                zIndex: 9999,
+                background: isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(30px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+              }}
+            >
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Новое окно
+              </div>
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Открыть...
+              </div>
+              <div className="border-t border-white/10 my-1" />
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Сохранить
+              </div>
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Сохранить как...
+              </div>
+              <div className="border-t border-white/10 my-1" />
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Закрыть окно
+              </div>
+            </div>
+          </div>
+
+          <div className="relative">
+            <button
+              className="text-sm opacity-70 hover:opacity-100 px-2 py-0.5 rounded hover:bg-white/10 transition-all"
+              style={{ color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                const menu = e.currentTarget.nextElementSibling as HTMLElement;
+                if (menu) {
+                  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                }
+              }}
+            >
+              Правка
+            </button>
+            <div
+              className="absolute top-7 left-0 liquid-glass-heavy rounded-xl py-2 min-w-[180px] shadow-2xl"
+              style={{
+                display: 'none',
+                zIndex: 9999,
+                background: isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(30px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+              }}
+            >
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Отменить
+              </div>
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Повторить
+              </div>
+              <div className="border-t border-white/10 my-1" />
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Вырезать
+              </div>
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Копировать
+              </div>
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Вставить
+              </div>
+              <div className="border-t border-white/10 my-1" />
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Выделить всё
+              </div>
+            </div>
+          </div>
+
+          <div className="relative">
+            <button
+              className="text-sm opacity-70 hover:opacity-100 px-2 py-0.5 rounded hover:bg-white/10 transition-all"
+              style={{ color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                const menu = e.currentTarget.nextElementSibling as HTMLElement;
+                if (menu) {
+                  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                }
+              }}
+            >
+              Вид
+            </button>
+            <div
+              className="absolute top-7 left-0 liquid-glass-heavy rounded-xl py-2 min-w-[180px] shadow-2xl"
+              style={{
+                display: 'none',
+                zIndex: 9999,
+                background: isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(30px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+              }}
+            >
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Как значки
+              </div>
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Как список
+              </div>
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Как колонки
+              </div>
+              <div className="border-t border-white/10 my-1" />
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Сортировка по имени
+              </div>
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Сортировка по дате
+              </div>
+              <div className="border-t border-white/10 my-1" />
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Показать панель инструментов
+              </div>
+              <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
+                Показать строку состояния
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right side */}
@@ -439,14 +585,21 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
           </button>
 
           {/* Battery */}
-          <span 
-            className="flex items-center gap-1 opacity-80" 
-            style={{ color: 'var(--text-primary)' }}
+          <button
+            className="flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+            style={{ color: 'var(--text-primary)', background: 'none', border: 'none' }}
             title={`Батарея: ${batteryLevel}%`}
+            onClick={(e) => {
+              e.stopPropagation();
+              // Открываем Control Center
+              setShowControlCenter(true);
+              setShowAppleMenu(false);
+              setShowSpotlight(false);
+            }}
           >
             <Icons.battery />
             <span className="text-xs">{batteryLevel}%</span>
-          </span>
+          </button>
 
           {/* Spotlight Button */}
           <div className="relative" ref={spotlightRef}>

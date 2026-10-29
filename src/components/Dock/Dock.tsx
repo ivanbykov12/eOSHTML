@@ -36,19 +36,20 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
     return 0;
   };
 
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.setData('appId', apps[index].id);
+  const handleDragStart = (e: React.DragEvent, appId: string) => {
+    e.dataTransfer.setData('appId', appId);
     e.dataTransfer.setData('source', 'dock');
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent, targetAppId: string) => {
     e.preventDefault();
-    if (draggedIndex !== null && draggedIndex !== index) {
-      if (onReorder) {
-        onReorder(draggedIndex, index);
-        setDraggedIndex(index);
+    const draggedAppId = e.dataTransfer.getData('appId');
+    if (draggedAppId && draggedAppId !== targetAppId && onReorder) {
+      const fromIndex = apps.findIndex(app => app.id === draggedAppId);
+      const toIndex = apps.findIndex(app => app.id === targetAppId);
+      if (fromIndex !== -1 && toIndex !== -1) {
+        onReorder(fromIndex, toIndex);
       }
     }
   };
@@ -193,8 +194,8 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
               }}
               onContextMenu={(e) => handleContextMenu(e, app.id)}
               draggable
-              onDragStart={(e) => handleDragStart(e, actualIndex)}
-              onDragOver={(e) => handleDragOver(e, actualIndex)}
+              onDragStart={(e) => handleDragStart(e, app.id)}
+              onDragOver={(e) => handleDragOver(e, app.id)}
               onDragEnd={handleDragEnd}
             >
               {/* Tooltip */}

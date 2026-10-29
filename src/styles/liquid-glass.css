@@ -382,6 +382,11 @@ body {
   border-radius: 8px;
 }
 
+.desktop-icon.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
 /* Scrollbar Styles */
 ::-webkit-scrollbar {
   width: 8px;

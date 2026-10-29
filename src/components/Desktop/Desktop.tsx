@@ -62,10 +62,13 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
     e.dataTransfer.setData('appId', appId);
     e.dataTransfer.setData('source', 'desktop');
     e.dataTransfer.effectAllowed = 'move';
+    // Добавляем класс для визуальной обратной связи
+    (e.target as HTMLElement).classList.add('dragging');
   }, []);
 
   const handleIconDragEnd = useCallback((e: React.DragEvent, appId: string) => {
     const target = e.target as HTMLElement;
+    target.classList.remove('dragging');
     const iconElement = target.closest('.desktop-icon') as HTMLElement;
     if (iconElement) {
       const rect = iconElement.getBoundingClientRect();
@@ -84,9 +87,18 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
     const source = e.dataTransfer.getData('source');
     
     if (draggedAppId && source === 'desktop' && draggedAppId !== targetAppId) {
+      // Меняем позиции иконок местами
       setIconPositions(prev => {
         const draggedPos = prev[draggedAppId];
         const targetPos = prev[targetAppId];
+        
+        // Если у целевой иконки нет позиции, используем текущую позицию dragged
+        if (!targetPos && draggedPos) {
+          return {
+            ...prev,
+            [draggedAppId]: draggedPos
+          };
+        }
         
         if (draggedPos && targetPos) {
           return {
