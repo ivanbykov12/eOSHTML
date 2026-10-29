@@ -1,18 +1,53 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { fs } from '../../core/FileSystem';
 import { getIconName } from '../../core/EAppParser';
 
 interface DesktopProps {
   onOpenApp: (appId: string, appName: string) => void;
   installedApps: { id: string; name: string; icon: string; iconUrl?: string; color: string }[];
+  onReorderApps?: (apps: any[]) => void;
 }
 
-export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
+const LAYOUT_KEY = 'eos_desktop_layout';
+
+export default function Desktop({ onOpenApp, installedApps, onReorderApps }: DesktopProps) {
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; item?: string } | null>(null);
-  const [iconPositions, setIconPositions] = useState<Record<string, { x: number; y: number }>>({});
+  const [appsOrder, setAppsOrder] = useState<string[]>(() => {
+    const saved = localStorage.getItem(LAYOUT_KEY);
+    return saved ? JSON.parse(saved) : installedApps.map(app => app.id);
+  });
+  const [draggedApp, setDraggedApp] = useState<string | null>(null);
+  const [dragOverApp, setDragOverApp] = useState<string | null>(null);
+
+  // Обновляем порядок при изменении installedApps
+  useEffect(() => {
+    const currentIds = installedApps.map(app => app.id);
+    const newOrder = appsOrder.filter(id => currentIds.includes(id));
+    
+    // Добавляем новые приложения в конец
+    currentIds.forEach(id => {
+      if (!newOrder.includes(id)) {
+        newOrder.push(id);
+      }
+    });
+    
+    if (JSON.stringify(newOrder) !== JSON.stringify(appsOrder)) {
+      setAppsOrder(newOrder);
+    }
+  }, [installedApps]);
+
+  // Сохраняем порядок в localStorage
+  useEffect(() => {
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(appsOrder));
+  }, [appsOrder]);
 
   const desktopFiles = fs.list('/users/ivan/Desktop');
+
+  // Сортируем приложения согласно порядку
+  const sortedApps = appsOrder
+    .map(id => installedApps.find(app => app.id === id))
+    .filter(app => app !== undefined) as typeof installedApps;
 
   const handleIconClick = useCallback((id: string) => {
     setSelectedIcon(id);
@@ -52,64 +87,58 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
         reader.readAsText(file);
       }
     }
+    setDraggedApp(null);
+    setDragOverApp(null);
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
   }, []);
 
-  const handleIconDragStart = useCallback((e: React.DragEvent, appId: string) => {
+  const handleAppDragStart = useCallback((e: React.DragEvent, appId: string) => {
+    setDraggedApp(appId);
     e.dataTransfer.setData('appId', appId);
     e.dataTransfer.setData('source', 'desktop');
     e.dataTransfer.effectAllowed = 'move';
-    // Добавляем класс для визуальной обратной связи
-    (e.target as HTMLElement).classList.add('dragging');
   }, []);
 
-  const handleIconDragEnd = useCallback((e: React.DragEvent, appId: string) => {
-    const target = e.target as HTMLElement;
-    target.classList.remove('dragging');
-    const iconElement = target.closest('.desktop-icon') as HTMLElement;
-    if (iconElement) {
-      const rect = iconElement.getBoundingClientRect();
-      setIconPositions(prev => ({
-        ...prev,
-        [appId]: { x: rect.left, y: rect.top }
-      }));
+  const handleAppDragOver = useCallback((e: React.DragEvent, targetAppId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (draggedApp && draggedApp !== targetAppId) {
+      setDragOverApp(targetAppId);
     }
-  }, []);
+  }, [draggedApp]);
 
-  const handleIconDrop = useCallback((e: React.DragEvent, targetAppId: string) => {
+  const handleAppDrop = useCallback((e: React.DragEvent, targetAppId: string) => {
     e.preventDefault();
     e.stopPropagation();
     
-    const draggedAppId = e.dataTransfer.getData('appId');
+    const sourceAppId = e.dataTransfer.getData('appId');
     const source = e.dataTransfer.getData('source');
     
-    if (draggedAppId && source === 'desktop' && draggedAppId !== targetAppId) {
-      // Меняем позиции иконок местами
-      setIconPositions(prev => {
-        const draggedPos = prev[draggedAppId];
-        const targetPos = prev[targetAppId];
+    if (sourceAppId && source === 'desktop' && sourceAppId !== targetAppId) {
+      setAppsOrder(prev => {
+        const newOrder = [...prev];
+        const fromIndex = newOrder.indexOf(sourceAppId);
+        const toIndex = newOrder.indexOf(targetAppId);
         
-        // Если у целевой иконки нет позиции, используем текущую позицию dragged
-        if (!targetPos && draggedPos) {
-          return {
-            ...prev,
-            [draggedAppId]: draggedPos
-          };
+        if (fromIndex !== -1 && toIndex !== -1) {
+          newOrder.splice(fromIndex, 1);
+          newOrder.splice(toIndex, 0, sourceAppId);
         }
         
-        if (draggedPos && targetPos) {
-          return {
-            ...prev,
-            [draggedAppId]: targetPos,
-            [targetAppId]: draggedPos
-          };
-        }
-        return prev;
+        return newOrder;
       });
     }
+    
+    setDraggedApp(null);
+    setDragOverApp(null);
+  }, []);
+
+  const handleAppDragEnd = useCallback(() => {
+    setDraggedApp(null);
+    setDragOverApp(null);
   }, []);
 
   return (
@@ -122,27 +151,27 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
       onTouchStart={() => { setContextMenu(null); }}
     >
       {/* Desktop Icons Grid */}
-      <div className="flex flex-col flex-wrap gap-2 h-full content-start">
+      <div 
+        className="grid gap-4 content-start h-full"
+        style={{
+          gridTemplateColumns: 'repeat(auto-fill, 80px)',
+          gridAutoRows: '90px',
+        }}
+      >
         {/* Installed Apps */}
-        {installedApps.map(app => (
+        {sortedApps.map(app => (
           <div
             key={app.id}
-            className={`desktop-icon flex flex-col items-center w-20 p-2 cursor-pointer ${
-              selectedIcon === app.id ? 'selected' : ''
+            className={`desktop-icon flex flex-col items-center w-20 p-2 cursor-pointer rounded-lg transition-all ${
+              selectedIcon === app.id ? 'bg-blue-500/20' : ''
+            } ${draggedApp === app.id ? 'opacity-50 scale-95' : ''} ${
+              dragOverApp === app.id ? 'bg-blue-500/30 scale-105' : ''
             }`}
-            style={iconPositions[app.id] ? {
-              position: 'absolute',
-              left: iconPositions[app.id].x,
-              top: iconPositions[app.id].y
-            } : undefined}
             draggable
-            onDragStart={(e) => handleIconDragStart(e, app.id)}
-            onDragEnd={(e) => handleIconDragEnd(e, app.id)}
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            onDrop={(e) => handleIconDrop(e, app.id)}
+            onDragStart={(e) => handleAppDragStart(e, app.id)}
+            onDragOver={(e) => handleAppDragOver(e, app.id)}
+            onDrop={(e) => handleAppDrop(e, app.id)}
+            onDragEnd={handleAppDragEnd}
             onClick={(e) => { e.stopPropagation(); handleIconClick(app.id); }}
             onDoubleClick={() => handleIconDoubleClick(app)}
             onTouchEnd={(e) => {
@@ -158,7 +187,7 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
             }}
             onContextMenu={(e) => { e.stopPropagation(); handleContextMenu(e, app.id); }}
           >
-            <div className={`w-12 h-12 rounded-xl overflow-hidden shadow-lg mb-1`}>
+            <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg mb-1">
               {app.iconUrl ? (
                 <img src={app.iconUrl} alt={app.name} className="w-full h-full object-cover scale-117" />
               ) : (
@@ -177,8 +206,8 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
         {desktopFiles.filter(f => f.type === 'file').map(file => (
           <div
             key={file.id}
-            className={`desktop-icon flex flex-col items-center w-20 p-2 cursor-pointer ${
-              selectedIcon === file.id ? 'selected' : ''
+            className={`desktop-icon flex flex-col items-center w-20 p-2 cursor-pointer rounded-lg ${
+              selectedIcon === file.id ? 'bg-blue-500/20' : ''
             }`}
             onClick={(e) => { e.stopPropagation(); handleIconClick(file.id); }}
             onDoubleClick={() => {

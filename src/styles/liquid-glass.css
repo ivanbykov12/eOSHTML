@@ -370,21 +370,25 @@ body {
 
 /* Desktop Icons */
 .desktop-icon {
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
 }
 
 .desktop-icon:hover {
   transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .desktop-icon.selected {
   background: rgba(0, 122, 255, 0.2);
-  border-radius: 8px;
 }
 
-.desktop-icon.dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
+.desktop-icon[draggable="true"] {
+  cursor: grab;
+}
+
+.desktop-icon[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 /* Scrollbar Styles */
