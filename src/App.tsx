@@ -282,6 +282,23 @@ export default function App() {
         }
       }
 
+      // Handle open settings tab request
+      if (e.data?.type === 'eos-open-settings-tab') {
+        const { tab } = e.data;
+        // Forward to all iframes (settings app will handle it)
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach(iframe => {
+          try {
+            iframe.contentWindow?.postMessage({
+              type: 'eos-open-settings-tab',
+              tab: tab
+            }, '*');
+          } catch (err) {
+            // Ignore cross-origin errors
+          }
+        });
+      }
+
       // Handle app removal
       if (e.data?.type === 'eapp-remove') {
         const { appId } = e.data;
@@ -528,11 +545,6 @@ export default function App() {
           apps={dockApps}
           onAppClick={handleDockClick}
           onClose={() => setShowLaunchpad(false)}
-          onAddToDock={(appId) => {
-            // App is already in dock, just close launchpad
-            setShowLaunchpad(false);
-          }}
-          onDockDrop={handleAddToDock}
         />
       )}
 

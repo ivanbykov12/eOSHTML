@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
+import { getIconName } from '../../core/EAppParser';
 
 interface LaunchpadProps {
   apps: { id: string; name: string; icon: string; iconUrl?: string; color: string }[];
   onAppClick: (appId: string) => void;
   onClose: () => void;
-  onAddToDock?: (appId: string) => void;
-  onDockDrop?: (appId: string) => void;
 }
 
-export default function Launchpad({ apps, onAppClick, onClose, onAddToDock, onDockDrop }: LaunchpadProps) {
+export default function Launchpad({ apps, onAppClick, onClose }: LaunchpadProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const appsPerPage = 35; // 7x5 grid
@@ -33,11 +32,10 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock, onDo
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  const getIconName = (icon: string) => {
-    if (icon.startsWith('material:')) {
-      return icon.replace('material:', '');
-    }
-    return icon;
+  const handleDragStart = (e: React.DragEvent, appId: string) => {
+    e.dataTransfer.setData('appId', appId);
+    e.dataTransfer.setData('source', 'launchpad');
+    e.dataTransfer.effectAllowed = 'copy';
   };
 
   return (
@@ -75,7 +73,7 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock, onDo
               setCurrentPage(0);
             }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full px-4 py-2 pl-10 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 outline-none focus:border-white/40 transition-all"
+            className="w-full px-4 py-2 pl-10 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 outline-none focus:border-white/40"
             autoFocus
           />
           <svg 
@@ -100,10 +98,7 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock, onDo
                 onClose();
               }}
               draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData('appId', app.id);
-                e.dataTransfer.effectAllowed = 'copy';
-              }}
+              onDragStart={(e) => handleDragStart(e, app.id)}
             >
               <div 
                 className={`w-16 h-16 rounded-2xl overflow-hidden shadow-lg mb-2 transition-transform group-hover:scale-110`}
@@ -137,6 +132,24 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock, onDo
         )}
       </div>
 
+      {/* Page Indicators */}
+      {totalPages > 1 && (
+        <div className="flex gap-2 mt-8 mb-4">
+          {Array.from({ length: totalPages }).map((_, idx) => (
+            <button
+              key={idx}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === currentPage ? 'bg-white' : 'bg-white/30'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCurrentPage(idx);
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Dock in Launchpad */}
       <div 
         className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[8600]"
@@ -148,8 +161,10 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock, onDo
           e.preventDefault();
           e.stopPropagation();
           const appId = e.dataTransfer.getData('appId');
-          if (appId && onDockDrop) {
-            onDockDrop(appId);
+          const source = e.dataTransfer.getData('source');
+          if (appId && source === 'launchpad') {
+            // App already in dock, just close launchpad
+            onClose();
           }
         }}
       >
@@ -202,24 +217,6 @@ export default function Launchpad({ apps, onAppClick, onClose, onAddToDock, onDo
           </div>
         </div>
       </div>
-
-      {/* Page Indicators */}
-      {totalPages > 1 && (
-        <div className="flex gap-2 mt-8 mb-4">
-          {Array.from({ length: totalPages }).map((_, idx) => (
-            <button
-              key={idx}
-              className={`w-2 h-2 rounded-full transition-all ${
-                idx === currentPage ? 'bg-white' : 'bg-white/30'
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setCurrentPage(idx);
-              }}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

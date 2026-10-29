@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { getIconName } from '../../core/EAppParser';
 
 interface DockProps {
@@ -11,7 +11,7 @@ interface DockProps {
   dockSize?: number;
 }
 
-export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, onReorder, dockSize = 48, onRemoveFromDock }: DockProps) {
+export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, onReorder, onRemoveFromDock, dockSize = 48 }: DockProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [touchActive, setTouchActive] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -38,6 +38,8 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
+    e.dataTransfer.setData('appId', apps[index].id);
+    e.dataTransfer.setData('source', 'dock');
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -58,11 +60,34 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const appId = e.dataTransfer.getData('appId');
-    if (appId) {
-      // App is already in dock from launchpad, just visual feedback
+    const source = e.dataTransfer.getData('source');
+    
+    // Если перетаскивают из Launchpad, добавляем в Dock
+    if (appId && source === 'launchpad') {
+      // App уже в dock, просто визуальный эффект
       console.log('Dropped app in dock:', appId);
     }
   };
+
+  const handleContextMenu = (e: React.MouseEvent, appId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY, appId });
+  };
+
+  // Закрытие контекстного меню при клике вне его
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (contextMenu) {
+        setContextMenu(null);
+      }
+    };
+
+    if (contextMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [contextMenu]);
 
   return (
     <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-[8000]">
@@ -87,6 +112,7 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
           }}
           onMouseEnter={() => setHoveredIndex(0)}
           onClick={() => onAppClick('finder_desktop')}
+          onContextMenu={(e) => handleContextMenu(e, 'finder_desktop')}
         >
           <div className="rounded-xl overflow-hidden shadow-lg" style={{ width: dockSize, height: dockSize }}>
             <img 
@@ -165,11 +191,7 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
                   onAppClick(app.id);
                 }
               }}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setContextMenu({ x: e.clientX, y: e.clientY, appId: app.id });
-              }}
+              onContextMenu={(e) => handleContextMenu(e, app.id)}
               draggable
               onDragStart={(e) => handleDragStart(e, actualIndex)}
               onDragOver={(e) => handleDragOver(e, actualIndex)}
@@ -256,18 +278,22 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
             >
               Открыть
             </div>
-            <div className="border-t border-white/10 my-1" />
-            <div 
-              className="px-4 py-1.5 hover:bg-red-500/20 cursor-pointer text-sm transition-colors text-red-400"
-              onClick={() => {
-                if (onRemoveFromDock) {
-                  onRemoveFromDock(contextMenu.appId);
-                }
-                setContextMenu(null);
-              }}
-            >
-              Удалить из Dock
-            </div>
+            {contextMenu.appId !== 'finder_desktop' && (
+              <>
+                <div className="border-t border-white/10 my-1" />
+                <div 
+                  className="px-4 py-1.5 hover:bg-red-500/20 cursor-pointer text-sm transition-colors text-red-400"
+                  onClick={() => {
+                    if (onRemoveFromDock) {
+                      onRemoveFromDock(contextMenu.appId);
+                    }
+                    setContextMenu(null);
+                  }}
+                >
+                  Удалить из Dock
+                </div>
+              </>
+            )}
           </div>
         </>
       )}

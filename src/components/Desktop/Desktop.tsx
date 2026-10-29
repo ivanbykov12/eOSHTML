@@ -25,6 +25,7 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
 
   const handleContextMenu = useCallback((e: React.MouseEvent, itemId?: string) => {
     e.preventDefault();
+    e.stopPropagation();
     setContextMenu({ x: e.clientX, y: e.clientY, item: itemId });
   }, []);
 
@@ -39,9 +40,7 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
           const content = ev.target?.result as string;
           try {
             const appData = JSON.parse(content);
-            // Save to filesystem
             fs.writeFile(`/users/ivan/Desktop/${file.name}`, content, { type: 'eapp' });
-            // Add to store for installation
             window.postMessage({
               type: 'eapp-add-to-store',
               app: appData
@@ -61,16 +60,43 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
 
   const handleIconDragStart = useCallback((e: React.DragEvent, appId: string) => {
     e.dataTransfer.setData('appId', appId);
+    e.dataTransfer.setData('source', 'desktop');
     e.dataTransfer.effectAllowed = 'move';
   }, []);
 
   const handleIconDragEnd = useCallback((e: React.DragEvent, appId: string) => {
-    const rect = (e.target as HTMLElement).closest('.desktop-icon')?.getBoundingClientRect();
-    if (rect) {
+    const target = e.target as HTMLElement;
+    const iconElement = target.closest('.desktop-icon') as HTMLElement;
+    if (iconElement) {
+      const rect = iconElement.getBoundingClientRect();
       setIconPositions(prev => ({
         ...prev,
         [appId]: { x: rect.left, y: rect.top }
       }));
+    }
+  }, []);
+
+  const handleIconDrop = useCallback((e: React.DragEvent, targetAppId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const draggedAppId = e.dataTransfer.getData('appId');
+    const source = e.dataTransfer.getData('source');
+    
+    if (draggedAppId && source === 'desktop' && draggedAppId !== targetAppId) {
+      setIconPositions(prev => {
+        const draggedPos = prev[draggedAppId];
+        const targetPos = prev[targetAppId];
+        
+        if (draggedPos && targetPos) {
+          return {
+            ...prev,
+            [draggedAppId]: targetPos,
+            [targetAppId]: draggedPos
+          };
+        }
+        return prev;
+      });
     }
   }, []);
 
@@ -100,11 +126,15 @@ export default function Desktop({ onOpenApp, installedApps }: DesktopProps) {
             draggable
             onDragStart={(e) => handleIconDragStart(e, app.id)}
             onDragEnd={(e) => handleIconDragEnd(e, app.id)}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDrop={(e) => handleIconDrop(e, app.id)}
             onClick={(e) => { e.stopPropagation(); handleIconClick(app.id); }}
             onDoubleClick={() => handleIconDoubleClick(app)}
             onTouchEnd={(e) => {
               e.stopPropagation();
-              // Double tap detection
               const now = Date.now();
               const lastTap = (e.currentTarget as any)._lastTap || 0;
               if (now - lastTap < 300) {

@@ -407,20 +407,36 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
         {/* Right side */}
         <div className="flex items-center gap-2">
           {/* Status Icons */}
-          <span 
-            className={`flex items-center transition-opacity ${wifiEnabled ? 'opacity-80' : 'opacity-30'}`} 
-            style={{ color: 'var(--text-primary)' }}
+          <button
+            className={`flex items-center transition-opacity hover:opacity-100 cursor-pointer`}
+            style={{ color: 'var(--text-primary)', opacity: wifiEnabled ? 0.8 : 0.3 }}
             title={wifiEnabled ? 'Wi-Fi подключено' : 'Wi-Fi отключено'}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenApp('settings_desktop');
+              // Открываем вкладку Wi-Fi в настройках
+              setTimeout(() => {
+                window.postMessage({ type: 'eos-open-settings-tab', tab: 'wifi' }, '*');
+              }, 100);
+            }}
           >
             <Icons.wifi />
-          </span>
-          <span 
-            className={`flex items-center transition-opacity ${bluetoothEnabled ? 'opacity-80' : 'opacity-30'}`} 
-            style={{ color: 'var(--text-primary)' }}
+          </button>
+          <button
+            className={`flex items-center transition-opacity hover:opacity-100 cursor-pointer`}
+            style={{ color: 'var(--text-primary)', opacity: bluetoothEnabled ? 0.8 : 0.3 }}
             title={bluetoothEnabled ? 'Bluetooth включен' : 'Bluetooth отключен'}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenApp('settings_desktop');
+              // Открываем вкладку Bluetooth в настройках
+              setTimeout(() => {
+                window.postMessage({ type: 'eos-open-settings-tab', tab: 'bluetooth' }, '*');
+              }, 100);
+            }}
           >
             <Icons.bluetooth />
-          </span>
+          </button>
 
           {/* Battery */}
           <span 
