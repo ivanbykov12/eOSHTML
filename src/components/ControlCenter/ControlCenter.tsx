@@ -5,7 +5,8 @@ interface ControlCenterProps {
   onClose: () => void;
 }
 
-type WidgetId = 'wifi' | 'bluetooth' | 'airplane' | 'focus' | 'brightness' | 'volume' | 'timer' | 'calculator' | 'camera' | 'screenshot';
+type WidgetType = 'toggle' | 'slider' | 'action';
+type WidgetSize = '1x1' | '1x2' | '2x1' | '2x2';
 
 interface WidgetState {
   wifi: boolean;
@@ -16,40 +17,61 @@ interface WidgetState {
   volume: number;
 }
 
-interface WidgetConfig {
-  id: WidgetId;
+interface WidgetInstance {
+  id: string;
+  type: WidgetType;
   icon: string;
   label: string;
-  type: 'toggle' | 'slider' | 'action';
+  size: WidgetSize;
+  appId?: string; // For action widgets
 }
 
-const ALL_WIDGETS: WidgetConfig[] = [
-  { id: 'wifi', icon: 'wifi', label: 'Wi-Fi', type: 'toggle' },
-  { id: 'bluetooth', icon: 'bluetooth', label: 'Bluetooth', type: 'toggle' },
-  { id: 'airplane', icon: 'airplanemode_active', label: 'Airplane', type: 'toggle' },
-  { id: 'focus', icon: 'do_not_disturb_on', label: 'Focus', type: 'toggle' },
-  { id: 'brightness', icon: 'brightness_high', label: 'Brightness', type: 'slider' },
-  { id: 'volume', icon: 'volume_up', label: 'Volume', type: 'slider' },
-  { id: 'timer', icon: 'timer', label: 'Timer', type: 'action' },
-  { id: 'calculator', icon: 'calculate', label: 'Calculator', type: 'action' },
-  { id: 'camera', icon: 'photo_camera', label: 'Camera', type: 'action' },
-  { id: 'screenshot', icon: 'screenshot_monitor', label: 'Screenshot', type: 'action' },
+interface WidgetTemplate {
+  id: string;
+  type: WidgetType;
+  icon: string;
+  label: string;
+  defaultSize: WidgetSize;
+  appId?: string;
+}
+
+const WIDGET_TEMPLATES: WidgetTemplate[] = [
+  { id: 'wifi', type: 'toggle', icon: 'wifi', label: 'Wi-Fi', defaultSize: '1x1' },
+  { id: 'bluetooth', type: 'toggle', icon: 'bluetooth', label: 'Bluetooth', defaultSize: '1x1' },
+  { id: 'airplane', type: 'toggle', icon: 'airplanemode_active', label: 'Airplane', defaultSize: '1x1' },
+  { id: 'focus', type: 'toggle', icon: 'do_not_disturb_on', label: 'Focus', defaultSize: '1x1' },
+  { id: 'brightness', type: 'slider', icon: 'brightness_high', label: 'Brightness', defaultSize: '2x1' },
+  { id: 'volume', type: 'slider', icon: 'volume_up', label: 'Volume', defaultSize: '2x1' },
+  { id: 'timer', type: 'action', icon: 'timer', label: 'Timer', defaultSize: '1x1', appId: 'clock_desktop' },
+  { id: 'calculator', type: 'action', icon: 'calculate', label: 'Calculator', defaultSize: '1x1', appId: 'calculator_desktop' },
+  { id: 'camera', type: 'action', icon: 'photo_camera', label: 'Camera', defaultSize: '1x1', appId: 'photos_desktop' },
+  { id: 'screenshot', type: 'action', icon: 'screenshot_monitor', label: 'Screenshot', defaultSize: '1x1', appId: 'photos_desktop' },
 ];
 
-const DEFAULT_LAYOUT: WidgetId[] = [
-  'wifi', 'bluetooth', 'airplane', 'focus',
-  'brightness', 'volume',
-  'timer', 'calculator', 'camera', 'screenshot'
+const DEFAULT_LAYOUT: WidgetInstance[] = [
+  { id: 'wifi', type: 'toggle', icon: 'wifi', label: 'Wi-Fi', size: '1x1' },
+  { id: 'bluetooth', type: 'toggle', icon: 'bluetooth', label: 'Bluetooth', size: '1x1' },
+  { id: 'airplane', type: 'toggle', icon: 'airplanemode_active', label: 'Airplane', size: '1x1' },
+  { id: 'focus', type: 'toggle', icon: 'do_not_disturb_on', label: 'Focus', size: '1x1' },
+  { id: 'brightness', type: 'slider', icon: 'brightness_high', label: 'Brightness', size: '2x1' },
+  { id: 'volume', type: 'slider', icon: 'volume_up', label: 'Volume', size: '2x1' },
+  { id: 'timer', type: 'action', icon: 'timer', label: 'Timer', size: '1x1', appId: 'clock_desktop' },
+  { id: 'calculator', type: 'action', icon: 'calculate', label: 'Calculator', size: '1x1', appId: 'calculator_desktop' },
+  { id: 'camera', type: 'action', icon: 'photo_camera', label: 'Camera', size: '1x1', appId: 'photos_desktop' },
+  { id: 'screenshot', type: 'action', icon: 'screenshot_monitor', label: 'Screenshot', size: '1x1', appId: 'photos_desktop' },
 ];
+
+const LAYOUT_KEY = 'eos_cc_layout_v2';
+const STATE_KEY = 'eos_cc_state';
 
 export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
-  const [layout, setLayout] = useState<WidgetId[]>(() => {
-    const saved = localStorage.getItem('eos_cc_layout');
+  const [layout, setLayout] = useState<WidgetInstance[]>(() => {
+    const saved = localStorage.getItem(LAYOUT_KEY);
     return saved ? JSON.parse(saved) : DEFAULT_LAYOUT;
   });
 
   const [widgetState, setWidgetState] = useState<WidgetState>(() => {
-    const saved = localStorage.getItem('eos_cc_state');
+    const saved = localStorage.getItem(STATE_KEY);
     return saved ? JSON.parse(saved) : {
       wifi: true,
       bluetooth: true,
@@ -61,32 +83,30 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
   });
 
   const [editMode, setEditMode] = useState(false);
-  const [draggedWidget, setDraggedWidget] = useState<WidgetId | null>(null);
-  const [dragOverWidget, setDragOverWidget] = useState<WidgetId | null>(null);
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
+  const [dragOverWidget, setDragOverWidget] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    localStorage.setItem('eos_cc_layout', JSON.stringify(layout));
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(layout));
   }, [layout]);
 
   useEffect(() => {
-    localStorage.setItem('eos_cc_state', JSON.stringify(widgetState));
+    localStorage.setItem(STATE_KEY, JSON.stringify(widgetState));
   }, [widgetState]);
 
-  // Sync state from localStorage (for Settings app changes)
+  // Sync state from localStorage
   useEffect(() => {
     const syncState = () => {
-      const saved = localStorage.getItem('eos_cc_state');
+      const saved = localStorage.getItem(STATE_KEY);
       if (saved) {
         try {
           const state = JSON.parse(saved);
           setWidgetState(prev => {
-            // Only update if values actually changed
-            if (prev.wifi !== state.wifi || 
-                prev.bluetooth !== state.bluetooth || 
-                prev.airplane !== state.airplane ||
-                prev.focus !== state.focus) {
+            if (prev.wifi !== state.wifi || prev.bluetooth !== state.bluetooth || 
+                prev.airplane !== state.airplane || prev.focus !== state.focus) {
               return { ...prev, ...state };
             }
             return prev;
@@ -98,8 +118,6 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
     };
 
     window.addEventListener('storage', syncState);
-    
-    // Also check periodically for same-tab changes
     const interval = setInterval(syncState, 500);
 
     return () => {
@@ -111,7 +129,9 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        if (editMode) {
+        if (showCreateMenu) {
+          setShowCreateMenu(false);
+        } else if (editMode) {
           setEditMode(false);
         } else {
           onClose();
@@ -120,7 +140,7 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, editMode, onClose]);
+  }, [isOpen, editMode, showCreateMenu, onClose]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -139,57 +159,79 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
     }
   }, [isOpen]);
 
-  const toggleWidget = (id: WidgetId) => {
+  const toggleWidget = (widget: WidgetInstance) => {
     if (editMode) return;
     
-    setWidgetState(prev => {
-      const newState = { ...prev };
-      if (id === 'wifi') newState.wifi = !prev.wifi;
-      if (id === 'bluetooth') newState.bluetooth = !prev.bluetooth;
-      if (id === 'airplane') {
-        newState.airplane = !prev.airplane;
-        if (newState.airplane) {
-          newState.wifi = false;
-          newState.bluetooth = false;
+    if (widget.type === 'toggle') {
+      setWidgetState(prev => {
+        const newState = { ...prev };
+        if (widget.id === 'wifi') {
+          newState.wifi = !prev.wifi;
+          if (newState.wifi) newState.airplane = false;
         }
-      }
-      if (id === 'focus') newState.focus = !prev.focus;
-      return newState;
-    });
-  };
-
-  const updateSlider = (id: 'brightness' | 'volume', value: number) => {
-    setWidgetState(prev => ({ ...prev, [id]: value }));
-  };
-
-  const removeWidget = (id: WidgetId) => {
-    setLayout(prev => prev.filter(w => w !== id));
-  };
-
-  const addWidget = (id: WidgetId) => {
-    if (!layout.includes(id)) {
-      setLayout(prev => [...prev, id]);
+        if (widget.id === 'bluetooth') {
+          newState.bluetooth = !prev.bluetooth;
+          if (newState.bluetooth) newState.airplane = false;
+        }
+        if (widget.id === 'airplane') {
+          newState.airplane = !prev.airplane;
+          if (newState.airplane) {
+            newState.wifi = false;
+            newState.bluetooth = false;
+          }
+        }
+        if (widget.id === 'focus') newState.focus = !prev.focus;
+        return newState;
+      });
+    } else if (widget.type === 'action' && widget.appId) {
+      window.postMessage({ type: 'eos-open-app', appId: widget.appId }, '*');
+      onClose();
     }
   };
 
-  const handleDragStart = (id: WidgetId) => {
-    setDraggedWidget(id);
+  const updateSlider = (id: string, value: number) => {
+    setWidgetState(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleDragOver = (e: React.DragEvent, id: WidgetId) => {
+  const removeWidget = (widgetId: string) => {
+    setLayout(prev => prev.filter(w => w.id !== widgetId));
+  };
+
+  const addWidget = (template: WidgetTemplate, size: WidgetSize = template.defaultSize) => {
+    const newWidget: WidgetInstance = {
+      id: template.id,
+      type: template.type,
+      icon: template.icon,
+      label: template.label,
+      size: size,
+      appId: template.appId,
+    };
+    setLayout(prev => [...prev, newWidget]);
+    setShowCreateMenu(false);
+  };
+
+  const changeWidgetSize = (widgetId: string, newSize: WidgetSize) => {
+    setLayout(prev => prev.map(w => w.id === widgetId ? { ...w, size: newSize } : w));
+  };
+
+  const handleDragStart = (widgetId: string) => {
+    setDraggedWidget(widgetId);
+  };
+
+  const handleDragOver = (e: React.DragEvent, widgetId: string) => {
     e.preventDefault();
-    setDragOverWidget(id);
+    setDragOverWidget(widgetId);
   };
 
-  const handleDrop = (targetId: WidgetId) => {
+  const handleDrop = (targetId: string) => {
     if (draggedWidget && draggedWidget !== targetId) {
       setLayout(prev => {
         const newLayout = [...prev];
-        const fromIndex = newLayout.indexOf(draggedWidget);
-        const toIndex = newLayout.indexOf(targetId);
+        const fromIndex = newLayout.findIndex(w => w.id === draggedWidget);
+        const toIndex = newLayout.findIndex(w => w.id === targetId);
         if (fromIndex !== -1 && toIndex !== -1) {
-          newLayout.splice(fromIndex, 1);
-          newLayout.splice(toIndex, 0, draggedWidget);
+          const [moved] = newLayout.splice(fromIndex, 1);
+          newLayout.splice(toIndex, 0, moved);
         }
         return newLayout;
       });
@@ -203,13 +245,32 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
     setDragOverWidget(null);
   };
 
-  const availableWidgets = ALL_WIDGETS.filter(w => !layout.includes(w.id));
+  const getGridSpan = (size: WidgetSize): string => {
+    switch (size) {
+      case '1x1': return 'span 1';
+      case '1x2': return 'span 2';
+      case '2x1': return 'span 2';
+      case '2x2': return 'span 4';
+      default: return 'span 1';
+    }
+  };
 
-  const isWidgetActive = (id: WidgetId): boolean => {
-    if (id === 'wifi') return widgetState.wifi;
-    if (id === 'bluetooth') return widgetState.bluetooth;
-    if (id === 'airplane') return widgetState.airplane;
-    if (id === 'focus') return widgetState.focus;
+  const getWidgetDimensions = (size: WidgetSize) => {
+    switch (size) {
+      case '1x1': return { width: '70px', height: '70px' };
+      case '1x2': return { width: '156px', height: '70px' };
+      case '2x1': return { width: '156px', height: '70px' };
+      case '2x2': return { width: '156px', height: '156px' };
+      default: return { width: '70px', height: '70px' };
+    }
+  };
+
+  const isWidgetActive = (widget: WidgetInstance): boolean => {
+    if (widget.type !== 'toggle') return false;
+    if (widget.id === 'wifi') return widgetState.wifi;
+    if (widget.id === 'bluetooth') return widgetState.bluetooth;
+    if (widget.id === 'airplane') return widgetState.airplane;
+    if (widget.id === 'focus') return widgetState.focus;
     return false;
   };
 
@@ -276,45 +337,44 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
             marginBottom: '20px',
           }}
         >
-          {layout.map(id => {
-            const widget = ALL_WIDGETS.find(w => w.id === id);
-            if (!widget) return null;
-
+          {layout.map(widget => {
             if (widget.type === 'slider') {
               return (
                 <LiquidSlider
-                  key={id}
+                  key={widget.id}
                   widget={widget}
-                  value={widgetState[id as 'brightness' | 'volume']}
-                  onChange={(v) => updateSlider(id as 'brightness' | 'volume', v)}
+                  value={widgetState[widget.id as 'brightness' | 'volume']}
+                  onChange={(v) => updateSlider(widget.id, v)}
                   editMode={editMode}
-                  onRemove={() => removeWidget(id)}
-                  dragged={draggedWidget === id}
-                  dragOver={dragOverWidget === id}
-                  onDragStart={() => handleDragStart(id)}
-                  onDragOver={(e) => handleDragOver(e, id)}
-                  onDrop={() => handleDrop(id)}
+                  onRemove={() => removeWidget(widget.id)}
+                  onResize={(size) => changeWidgetSize(widget.id, size)}
+                  dragged={draggedWidget === widget.id}
+                  dragOver={dragOverWidget === widget.id}
+                  onDragStart={() => handleDragStart(widget.id)}
+                  onDragOver={(e) => handleDragOver(e, widget.id)}
+                  onDrop={() => handleDrop(widget.id)}
                   onDragEnd={handleDragEnd}
                 />
               );
             }
 
-            const active = isWidgetActive(id);
+            const active = isWidgetActive(widget);
+            const dims = getWidgetDimensions(widget.size);
 
             return (
               <div
-                key={id}
+                key={widget.id}
                 draggable={editMode}
-                onDragStart={() => handleDragStart(id)}
-                onDragOver={(e) => handleDragOver(e, id)}
-                onDrop={() => handleDrop(id)}
+                onDragStart={() => handleDragStart(widget.id)}
+                onDragOver={(e) => handleDragOver(e, widget.id)}
+                onDrop={() => handleDrop(widget.id)}
                 onDragEnd={handleDragEnd}
-                onClick={() => toggleWidget(id)}
-                className={`cc-widget ${editMode ? 'cc-edit-mode' : ''} ${draggedWidget === id ? 'cc-dragging' : ''} ${dragOverWidget === id && draggedWidget !== id ? 'cc-drag-over' : ''}`}
+                onClick={() => toggleWidget(widget)}
+                className={`cc-widget ${editMode ? 'cc-edit-mode' : ''} ${draggedWidget === widget.id ? 'cc-dragging' : ''} ${dragOverWidget === widget.id && draggedWidget !== widget.id ? 'cc-drag-over' : ''}`}
                 style={{
-                  width: '70px',
-                  height: '70px',
-                  borderRadius: '50%',
+                  gridColumn: getGridSpan(widget.size),
+                  ...dims,
+                  borderRadius: widget.size === '1x1' ? '50%' : '35px',
                   background: active
                     ? 'linear-gradient(135deg, #0A84FF, #007AFF)'
                     : 'rgba(255, 255, 255, 0.08)',
@@ -344,44 +404,50 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
                 }}
               >
                 {editMode && (
-                  <button
-                    className="cc-remove-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeWidget(id);
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: '-6px',
-                      left: '-6px',
-                      width: '22px',
-                      height: '22px',
-                      borderRadius: '50%',
-                      background: 'rgba(120, 120, 120, 0.6)',
-                      border: '1px solid rgba(255, 255, 255, 0.25)',
-                      color: 'white',
-                      fontSize: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      zIndex: 10,
-                      backdropFilter: 'blur(10px)',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
-                    }}
-                  >
-                    −
-                  </button>
+                  <>
+                    <button
+                      className="cc-remove-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeWidget(widget.id);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '-6px',
+                        left: '-6px',
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '50%',
+                        background: 'rgba(120, 120, 120, 0.6)',
+                        border: '1px solid rgba(255, 255, 255, 0.25)',
+                        color: 'white',
+                        fontSize: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        zIndex: 10,
+                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                      }}
+                    >
+                      −
+                    </button>
+                    <SizeSelector
+                      currentSize={widget.size}
+                      onSizeChange={(size) => changeWidgetSize(widget.id, size)}
+                    />
+                  </>
                 )}
                 <span className="material-icons" style={{ 
-                  fontSize: '28px', 
+                  fontSize: widget.size === '1x1' ? '28px' : '32px',
                   color: 'white',
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
                 }}>
                   {widget.icon}
                 </span>
                 <span style={{ 
-                  fontSize: '10px', 
+                  fontSize: widget.size === '1x1' ? '10px' : '12px',
                   fontWeight: 500, 
                   color: 'white', 
                   marginTop: '3px',
@@ -394,67 +460,93 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
           })}
         </div>
 
-        {/* Edit Mode - Available Widgets */}
-        {editMode && availableWidgets.length > 0 && (
+        {/* Edit Mode Controls */}
+        {editMode && (
           <div style={{ marginBottom: '20px' }}>
-            <div style={{ 
-              fontSize: '12px', 
-              fontWeight: 600, 
-              marginBottom: '10px', 
-              opacity: 0.6,
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}>
-              Доступные виджеты
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {availableWidgets.map(widget => (
-                <div
-                  key={widget.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '10px 14px',
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    borderRadius: '14px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-                  }}
-                >
-                  <span className="material-icons" style={{ fontSize: '20px', opacity: 0.8 }}>
-                    {widget.icon}
-                  </span>
-                  <span style={{ flex: 1, fontSize: '13px' }}>{widget.label}</span>
-                  <button
-                    onClick={() => addWidget(widget.id)}
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      background: '#34c759',
-                      border: 'none',
-                      color: 'white',
-                      fontSize: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(52, 199, 89, 0.5)',
-                    }}
-                  >
-                    +
-                  </button>
+            <button
+              onClick={() => setShowCreateMenu(!showCreateMenu)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                background: 'rgba(52, 199, 89, 0.2)',
+                border: '1px solid rgba(52, 199, 89, 0.4)',
+                borderRadius: '14px',
+                color: '#34c759',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'all 0.2s',
+              }}
+            >
+              <span className="material-icons" style={{ fontSize: '18px' }}>add_circle</span>
+              Добавить виджет
+            </button>
+
+            {showCreateMenu && (
+              <div style={{ 
+                marginTop: '12px',
+                padding: '12px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: '14px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
+                <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '10px', opacity: 0.6 }}>
+                  Выберите тип виджета
                 </div>
-              ))}
-            </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {WIDGET_TEMPLATES.map(template => (
+                    <div
+                      key={template.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '8px 12px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '10px',
+                      }}
+                    >
+                      <span className="material-icons" style={{ fontSize: '18px', opacity: 0.8 }}>
+                        {template.icon}
+                      </span>
+                      <span style={{ flex: 1, fontSize: '12px' }}>{template.label}</span>
+                      <select
+                        onChange={(e) => addWidget(template, e.target.value as WidgetSize)}
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '6px',
+                          padding: '4px 8px',
+                          fontSize: '11px',
+                          color: 'white',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <option value={template.defaultSize}>Добавить ({template.defaultSize})</option>
+                        <option value="1x1">1×1</option>
+                        <option value="1x2">1×2</option>
+                        <option value="2x1">2×1</option>
+                        <option value="2x2">2×2</option>
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Edit Controls Button */}
         <div style={{ textAlign: 'center' }}>
           <button
-            onClick={() => setEditMode(!editMode)}
+            onClick={() => {
+              setEditMode(!editMode);
+              setShowCreateMenu(false);
+            }}
             style={{
               background: editMode ? '#0A84FF' : 'transparent',
               color: editMode ? 'white' : 'rgba(255, 255, 255, 0.85)',
@@ -479,6 +571,57 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
   );
 }
 
+// Size Selector Component
+function SizeSelector({ currentSize, onSizeChange }: { currentSize: WidgetSize; onSizeChange: (size: WidgetSize) => void }) {
+  const sizes: WidgetSize[] = ['1x1', '1x2', '2x1', '2x2'];
+  
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: '-8px',
+        right: '-8px',
+        display: 'flex',
+        gap: '2px',
+        background: 'rgba(0, 0, 0, 0.6)',
+        borderRadius: '8px',
+        padding: '2px',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        zIndex: 10,
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {sizes.map(size => (
+        <button
+          key={size}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSizeChange(size);
+          }}
+          style={{
+            width: '20px',
+            height: '20px',
+            borderRadius: '6px',
+            background: currentSize === size ? '#0A84FF' : 'transparent',
+            border: 'none',
+            color: 'white',
+            fontSize: '9px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+        >
+          {size}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // Liquid Slider Component
 function LiquidSlider({
   widget,
@@ -486,6 +629,7 @@ function LiquidSlider({
   onChange,
   editMode,
   onRemove,
+  onResize,
   dragged,
   dragOver,
   onDragStart,
@@ -493,11 +637,12 @@ function LiquidSlider({
   onDrop,
   onDragEnd,
 }: {
-  widget: WidgetConfig;
+  widget: WidgetInstance;
   value: number;
   onChange: (v: number) => void;
   editMode: boolean;
   onRemove: () => void;
+  onResize: (size: WidgetSize) => void;
   dragged: boolean;
   dragOver: boolean;
   onDragStart: () => void;
@@ -557,7 +702,7 @@ function LiquidSlider({
       onDragEnd={onDragEnd}
       className={`cc-slider ${dragged ? 'cc-dragging' : ''} ${dragOver ? 'cc-drag-over' : ''}`}
       style={{
-        gridColumn: 'span 4',
+        gridColumn: getGridSpan(widget.size),
         height: '56px',
         borderRadius: '999px',
         background: 'rgba(255, 255, 255, 0.08)',
@@ -574,30 +719,33 @@ function LiquidSlider({
       }}
     >
       {editMode && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          style={{
-            position: 'absolute',
-            top: '6px',
-            left: '6px',
-            width: '22px',
-            height: '22px',
-            borderRadius: '50%',
-            background: 'rgba(120, 120, 120, 0.6)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
-            color: 'white',
-            fontSize: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            zIndex: 10,
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
-          }}
-        >
-          −
-        </button>
+        <>
+          <button
+            onClick={(e) => { e.stopPropagation(); onRemove(); }}
+            style={{
+              position: 'absolute',
+              top: '6px',
+              left: '6px',
+              width: '22px',
+              height: '22px',
+              borderRadius: '50%',
+              background: 'rgba(120, 120, 120, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              color: 'white',
+              fontSize: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              zIndex: 10,
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            −
+          </button>
+          <SizeSelector currentSize={widget.size} onSizeChange={onResize} />
+        </>
       )}
       
       {/* Fill */}
@@ -671,4 +819,14 @@ function LiquidSlider({
       </div>
     </div>
   );
+}
+
+function getGridSpan(size: WidgetSize): string {
+  switch (size) {
+    case '1x1': return 'span 1';
+    case '1x2': return 'span 2';
+    case '2x1': return 'span 2';
+    case '2x2': return 'span 4';
+    default: return 'span 1';
+  }
 }
