@@ -74,6 +74,40 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
     localStorage.setItem('eos_cc_state', JSON.stringify(widgetState));
   }, [widgetState]);
 
+  // Sync state from localStorage (for Settings app changes)
+  useEffect(() => {
+    const syncState = () => {
+      const saved = localStorage.getItem('eos_cc_state');
+      if (saved) {
+        try {
+          const state = JSON.parse(saved);
+          setWidgetState(prev => {
+            // Only update if values actually changed
+            if (prev.wifi !== state.wifi || 
+                prev.bluetooth !== state.bluetooth || 
+                prev.airplane !== state.airplane ||
+                prev.focus !== state.focus) {
+              return { ...prev, ...state };
+            }
+            return prev;
+          });
+        } catch (e) {
+          console.error('Failed to sync CC state:', e);
+        }
+      }
+    };
+
+    window.addEventListener('storage', syncState);
+    
+    // Also check periodically for same-tab changes
+    const interval = setInterval(syncState, 500);
+
+    return () => {
+      window.removeEventListener('storage', syncState);
+      clearInterval(interval);
+    };
+  }, []);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -216,16 +250,16 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
           width: '360px',
           maxHeight: 'calc(100vh - 80px)',
           overflowY: 'auto',
-          background: 'rgba(30, 30, 30, 0.65)',
-          backdropFilter: 'blur(40px) saturate(200%) brightness(1.1)',
-          WebkitBackdropFilter: 'blur(40px) saturate(200%) brightness(1.1)',
+          background: 'rgba(30, 30, 30, 0.4)',
+          backdropFilter: 'blur(50px) saturate(200%) brightness(1.1)',
+          WebkitBackdropFilter: 'blur(50px) saturate(200%) brightness(1.1)',
           borderRadius: '40px',
           padding: '24px',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
           boxShadow: `
-            0 20px 60px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.12),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.15)
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1)
           `,
           color: '#f5f5f7',
           animation: 'ccOpen 0.3s cubic-bezier(0.32, 0.72, 0, 1)',

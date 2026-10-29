@@ -78,12 +78,42 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState(85);
   const [spotlightQuery, setSpotlightQuery] = useState('');
+  const [wifiEnabled, setWifiEnabled] = useState(true);
+  const [bluetoothEnabled, setBluetoothEnabled] = useState(true);
   const appleMenuRef = useRef<HTMLDivElement>(null);
   const controlCenterRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  // Control Center state moved to ControlCenter component
+  // Sync Wi-Fi/Bluetooth state from localStorage
+  useEffect(() => {
+    const syncState = () => {
+      const saved = localStorage.getItem('eos_cc_state');
+      if (saved) {
+        try {
+          const state = JSON.parse(saved);
+          setWifiEnabled(state.wifi !== false);
+          setBluetoothEnabled(state.bluetooth !== false);
+        } catch (e) {
+          console.error('Failed to parse CC state:', e);
+        }
+      }
+    };
+
+    // Initial sync
+    syncState();
+
+    // Listen for storage changes
+    window.addEventListener('storage', syncState);
+    
+    // Also check periodically (for same-tab changes)
+    const interval = setInterval(syncState, 500);
+
+    return () => {
+      window.removeEventListener('storage', syncState);
+      clearInterval(interval);
+    };
+  }, []);
 
   // Track fullscreen state
   useEffect(() => {
@@ -378,16 +408,16 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
         <div className="flex items-center gap-2">
           {/* Status Icons */}
           <span 
-            className="flex items-center opacity-80" 
+            className={`flex items-center transition-opacity ${wifiEnabled ? 'opacity-80' : 'opacity-30'}`} 
             style={{ color: 'var(--text-primary)' }}
-            title="Wi-Fi"
+            title={wifiEnabled ? 'Wi-Fi подключено' : 'Wi-Fi отключено'}
           >
             <Icons.wifi />
           </span>
           <span 
-            className="flex items-center opacity-80" 
+            className={`flex items-center transition-opacity ${bluetoothEnabled ? 'opacity-80' : 'opacity-30'}`} 
             style={{ color: 'var(--text-primary)' }}
-            title="Bluetooth"
+            title={bluetoothEnabled ? 'Bluetooth включен' : 'Bluetooth отключен'}
           >
             <Icons.bluetooth />
           </span>
