@@ -220,13 +220,31 @@ export default function App() {
             if (prev.find(a => a.id === app.id)) {
               return prev;
             }
-            return [...prev, {
+            const newApps = [...prev, {
               id: app.id,
               name: app.name,
               icon: app.icon || 'material:apps',
               color: app.color || 'from-gray-500 to-gray-700',
               app: app
             }];
+            
+            // Notify all iframes about app installation
+            setTimeout(() => {
+              const iframes = document.querySelectorAll('iframe');
+              iframes.forEach(iframe => {
+                try {
+                  iframe.contentWindow?.postMessage({
+                    type: 'eos-app-changed',
+                    appId: app.id,
+                    action: 'installed'
+                  }, '*');
+                } catch (err) {
+                  // Ignore cross-origin errors
+                }
+              });
+            }, 100);
+            
+            return newApps;
           });
           // Remove from store apps if it was there
           setStoreApps(prev => prev.filter(a => a.id !== app.id));
@@ -327,6 +345,20 @@ export default function App() {
           setInstalledApps(prev => prev.filter(a => a.id !== appId));
           // Close all windows of this app
           setWindows(prev => prev.filter(w => w.appId !== appId));
+          
+          // Notify all iframes about app removal
+          const iframes = document.querySelectorAll('iframe');
+          iframes.forEach(iframe => {
+            try {
+              iframe.contentWindow?.postMessage({
+                type: 'eos-app-changed',
+                appId: appId,
+                action: 'removed'
+              }, '*');
+            } catch (err) {
+              // Ignore cross-origin errors
+            }
+          });
         }
       }
       
