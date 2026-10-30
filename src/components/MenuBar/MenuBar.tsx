@@ -76,7 +76,6 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
   const [showSpotlight, setShowSpotlight] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [batteryLevel, setBatteryLevel] = useState(85);
   const [spotlightQuery, setSpotlightQuery] = useState('');
   const [wifiEnabled, setWifiEnabled] = useState(true);
   const [bluetoothEnabled, setBluetoothEnabled] = useState(true);
@@ -128,18 +127,6 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
     };
-  }, []);
-
-  // Battery status
-  useEffect(() => {
-    if ('getBattery' in navigator) {
-      (navigator as any).getBattery().then((battery: any) => {
-        setBatteryLevel(Math.round(battery.level * 100));
-        battery.addEventListener('levelchange', () => {
-          setBatteryLevel(Math.round(battery.level * 100));
-        });
-      });
-    }
   }, []);
 
   const toggleFullscreen = () => {
@@ -582,23 +569,6 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
             }}
           >
             <Icons.bluetooth />
-          </button>
-
-          {/* Battery */}
-          <button
-            className="flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
-            style={{ color: 'var(--text-primary)', background: 'none', border: 'none' }}
-            title={`Батарея: ${batteryLevel}%`}
-            onClick={(e) => {
-              e.stopPropagation();
-              // Открываем Control Center
-              setShowControlCenter(true);
-              setShowAppleMenu(false);
-              setShowSpotlight(false);
-            }}
-          >
-            <Icons.battery />
-            <span className="text-xs">{batteryLevel}%</span>
           </button>
 
           {/* Spotlight Button */}

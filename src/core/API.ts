@@ -146,13 +146,13 @@ export function getAPIScript(): string {
           close: function() { window.parent.postMessage({type:'eos-close'}, '*'); },
           minimize: function() { window.parent.postMessage({type:'eos-minimize'}, '*'); },
           checkPermission: function(r, a) { return true; },
-          getDevice: function() { return 'Macbook 13 Pro'; },
+          getDevice: function() { return 'Mak mini'; },
           getRBACLevel: function() { return '${rbac.getLevel()}'; },
           getSettings: function() { return ${JSON.stringify(settings)}; },
           setSettings: function(s) { window.parent.postMessage({type:'eos-settings', data:s}, '*'); }
         };
         window.ePhoneContext = {
-          modelName: 'Macbook 13 Pro',
+          modelName: 'Mak mini',
           model: 'eosdesktop',
           isDesktop: true,
           osVersion: '10.1 beta',
