@@ -22,6 +22,9 @@ export interface EAppV11 extends EAppBase {
   background?: string;
   author?: string;
   description?: string;
+  fixedSize?: boolean;
+  fixedWidth?: number;
+  fixedHeight?: number;
 }
 
 export type EApp = EAppV10 | EAppV11;

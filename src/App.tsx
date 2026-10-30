@@ -152,18 +152,24 @@ export default function App() {
     const windowId = `win_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
     const maxZ = Math.max(...windows.map(w => w.zIndex), 0);
 
+    // Check if app has fixed size
+    const isFixedSize = appData?.app && 'fixedSize' in appData.app && appData.app.fixedSize === true;
+    const fixedWidth = isFixedSize && appData?.app && 'fixedWidth' in appData.app ? (appData.app.fixedWidth || 800) : 800;
+    const fixedHeight = isFixedSize && appData?.app && 'fixedHeight' in appData.app ? (appData.app.fixedHeight || 550) : 550;
+
     const newWindow: WindowState = {
       id: windowId,
       appId,
       title: appName || appData?.name || 'Application',
       x: 100 + (windows.length * 30) % 200,
       y: 60 + (windows.length * 30) % 150,
-      width: 800,
-      height: 550,
+      width: fixedWidth,
+      height: fixedHeight,
       minimized: false,
       maximized: false,
       zIndex: maxZ + 1,
       app: appData?.app,
+      fixedSize: isFixedSize,
     };
 
     setWindows(prev => [...prev, newWindow]);

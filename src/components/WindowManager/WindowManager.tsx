@@ -16,6 +16,7 @@ export interface WindowState {
   app?: EApp;
   tabs?: { id: string; title: string; appId: string }[];
   activeTab?: number;
+  fixedSize?: boolean;
 }
 
 interface WindowManagerProps {
@@ -330,7 +331,7 @@ export default function WindowManager({
           </div>
 
           {/* Resize Handles - all sides and corners */}
-          {!win.maximized && (
+          {!win.maximized && !win.fixedSize && (
             <>
               {/* Top edge */}
               <div
