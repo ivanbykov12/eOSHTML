@@ -149,7 +149,18 @@ export function getAPIScript(): string {
           getDevice: function() { return 'Mak mini'; },
           getRBACLevel: function() { return '${rbac.getLevel()}'; },
           getSettings: function() { return ${JSON.stringify(settings)}; },
-          setSettings: function(s) { window.parent.postMessage({type:'eos-settings', data:s}, '*'); }
+          setSettings: function(s) { window.parent.postMessage({type:'eos-settings', data:s}, '*'); },
+          isAppInstalled: function(appId) {
+            return new Promise(function(resolve) {
+              window.parent.postMessage({type:'eos-check-app', appId: appId}, '*');
+              window.addEventListener('message', function handler(e) {
+                if (e.data && e.data.type === 'eos-check-app-result' && e.data.appId === appId) {
+                  window.removeEventListener('message', handler);
+                  resolve(e.data.installed);
+                }
+              });
+            });
+          }
         };
         window.ePhoneContext = {
           modelName: 'Mak mini',

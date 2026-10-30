@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { isUIElementVisible } from '../../core/AppDependencies';
 
 interface ControlCenterProps {
   isOpen: boolean;
   onClose: () => void;
+  installedApps?: { id: string }[];
 }
 
 type WidgetType = 'toggle' | 'slider' | 'action';
@@ -67,7 +69,7 @@ const STATE_KEY = 'eos_cc_state';
 
 let instanceCounter = 100;
 
-export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
+export default function ControlCenter({ isOpen, onClose, installedApps = [] }: ControlCenterProps) {
   const [layout, setLayout] = useState<WidgetInstance[]>(() => {
     const saved = localStorage.getItem(LAYOUT_KEY);
     return saved ? JSON.parse(saved) : DEFAULT_LAYOUT;
@@ -343,7 +345,11 @@ export default function ControlCenter({ isOpen, onClose }: ControlCenterProps) {
             marginBottom: '20px',
           }}
         >
-          {layout.map(widget => {
+          {layout.filter(widget => {
+            // Filter widgets based on installed apps
+            const widgetElementId = `${widget.id}-widget`;
+            return isUIElementVisible('controlcenter', widgetElementId, installedApps);
+          }).map(widget => {
             if (widget.type === 'slider') {
               return (
                 <LiquidSlider

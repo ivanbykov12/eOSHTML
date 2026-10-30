@@ -288,6 +288,20 @@ export default function App() {
         }
       }
 
+      // Handle check if app is installed
+      if (e.data?.type === 'eos-check-app') {
+        const { appId } = e.data;
+        const isInstalled = installedApps.some(a => a.id === appId);
+        const source = e.source as Window;
+        if (source) {
+          source.postMessage({
+            type: 'eos-check-app-result',
+            appId: appId,
+            installed: isInstalled
+          }, '*');
+        }
+      }
+
       // Handle open settings tab request
       if (e.data?.type === 'eos-open-settings-tab') {
         const { tab } = e.data;
@@ -517,7 +531,8 @@ export default function App() {
         <MenuBar 
           activeWindowTitle={activeWindowTitle} 
           isDark={isDark} 
-          onOpenApp={openApp} 
+          onOpenApp={openApp}
+          installedApps={installedApps}
         />
       )}
 

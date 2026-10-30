@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import ControlCenter from '../ControlCenter/ControlCenter';
+import { isUIElementVisible } from '../../core/AppDependencies';
 
 interface MenuBarProps {
   activeWindowTitle: string | null;
   isDark: boolean;
   onOpenApp: (appId: string) => void;
+  installedApps?: { id: string }[];
 }
 
 // SVG Icons
@@ -69,7 +71,7 @@ const Icons = {
   )
 };
 
-export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBarProps) {
+export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installedApps = [] }: MenuBarProps) {
   const [time, setTime] = useState(new Date());
   const [showAppleMenu, setShowAppleMenu] = useState(false);
   const [showControlCenter, setShowControlCenter] = useState(false);
@@ -322,28 +324,34 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
                 }}
                 onClick={e => e.stopPropagation()}
               >
-                <div 
-                  className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors font-semibold" 
-                  style={{ color: 'var(--text-primary)' }}
-                  onClick={() => handleAppleMenuClick('about')}
-                >
-                  Об этом Mac
-                </div>
+                {isUIElementVisible('menubar', 'about-menu-item', installedApps) && (
+                  <div 
+                    className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors font-semibold" 
+                    style={{ color: 'var(--text-primary)' }}
+                    onClick={() => handleAppleMenuClick('about')}
+                  >
+                    Об этом Mac
+                  </div>
+                )}
                 <div className="border-t border-white/10 my-1" />
-                <div 
-                  className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors" 
-                  style={{ color: 'var(--text-primary)' }}
-                  onClick={() => handleAppleMenuClick('settings')}
-                >
-                  Системные настройки...
-                </div>
-                <div 
-                  className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors" 
-                  style={{ color: 'var(--text-primary)' }}
-                  onClick={() => handleAppleMenuClick('appstore')}
-                >
-                  App Store...
-                </div>
+                {isUIElementVisible('menubar', 'settings-menu-item', installedApps) && (
+                  <div 
+                    className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors" 
+                    style={{ color: 'var(--text-primary)' }}
+                    onClick={() => handleAppleMenuClick('settings')}
+                  >
+                    Системные настройки...
+                  </div>
+                )}
+                {isUIElementVisible('menubar', 'appstore-menu-item', installedApps) && (
+                  <div 
+                    className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors" 
+                    style={{ color: 'var(--text-primary)' }}
+                    onClick={() => handleAppleMenuClick('appstore')}
+                  >
+                    App Store...
+                  </div>
+                )}
                 <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm transition-colors opacity-60">
                   Недавние объекты ▸
                 </div>
@@ -652,6 +660,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp }: MenuBa
               <ControlCenter
                 isOpen={showControlCenter}
                 onClose={() => setShowControlCenter(false)}
+                installedApps={installedApps}
               />
             )}
           </div>
