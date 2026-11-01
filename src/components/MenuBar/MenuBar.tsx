@@ -174,7 +174,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
       }
       
       // Close all dropdown menus
-      const dropdowns = document.querySelectorAll('.liquid-glass-heavy[style*="display: block"]');
+      const dropdowns = document.querySelectorAll('.liquid-glass-panel[style*="display: block"]');
       dropdowns.forEach(dropdown => {
         if (!dropdown.contains(e.target as Node)) {
           (dropdown as HTMLElement).style.display = 'none';
@@ -315,12 +315,9 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
 
             {showAppleMenu && (
               <div
-                className="absolute top-7 left-0 liquid-glass-heavy rounded-xl py-2 min-w-[220px] shadow-2xl"
+                className="absolute top-7 left-0 liquid-glass-panel rounded-xl py-2 min-w-[220px]"
                 style={{ 
-                  zIndex: 9999,
-                  background: isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-                  backdropFilter: 'blur(30px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+                  zIndex: 9999
                 }}
                 onClick={e => e.stopPropagation()}
               >
@@ -418,13 +415,10 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               Файл
             </button>
             <div
-              className="absolute top-7 left-0 liquid-glass-heavy rounded-xl py-2 min-w-[180px] shadow-2xl"
+              className="absolute top-7 left-0 liquid-glass-panel rounded-xl py-2 min-w-[180px]"
               style={{
                 display: 'none',
-                zIndex: 9999,
-                background: isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-                backdropFilter: 'blur(30px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+                zIndex: 9999
               }}
             >
               <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
@@ -462,13 +456,10 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               Правка
             </button>
             <div
-              className="absolute top-7 left-0 liquid-glass-heavy rounded-xl py-2 min-w-[180px] shadow-2xl"
+              className="absolute top-7 left-0 liquid-glass-panel rounded-xl py-2 min-w-[180px]"
               style={{
                 display: 'none',
-                zIndex: 9999,
-                background: isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-                backdropFilter: 'blur(30px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+                zIndex: 9999
               }}
             >
               <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
@@ -509,13 +500,10 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               Вид
             </button>
             <div
-              className="absolute top-7 left-0 liquid-glass-heavy rounded-xl py-2 min-w-[180px] shadow-2xl"
+              className="absolute top-7 left-0 liquid-glass-panel rounded-xl py-2 min-w-[180px]"
               style={{
                 display: 'none',
-                zIndex: 9999,
-                background: isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-                backdropFilter: 'blur(30px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+                zIndex: 9999
               }}
             >
               <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
@@ -603,12 +591,9 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
 
             {showSpotlight && (
               <div
-                className="absolute top-8 right-0 liquid-glass-heavy rounded-xl p-4 w-96 shadow-2xl"
+                className="absolute top-8 right-0 liquid-glass-panel rounded-xl p-4 w-96"
                 style={{ 
-                  zIndex: 9999,
-                  background: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(40px) saturate(200%)',
-                  WebkitBackdropFilter: 'blur(40px) saturate(200%)'
+                  zIndex: 9999
                 }}
                 onClick={e => e.stopPropagation()}
               >
@@ -705,12 +690,9 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
 
             {showCalendar && (
               <div
-                className="absolute top-8 right-0 liquid-glass-heavy rounded-xl p-4 w-80 shadow-2xl"
+                className="absolute top-8 right-0 liquid-glass-panel rounded-xl p-4 w-80"
                 style={{ 
-                  zIndex: 9999,
-                  background: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(40px) saturate(200%)',
-                  WebkitBackdropFilter: 'blur(40px) saturate(200%)'
+                  zIndex: 9999
                 }}
                 onClick={e => e.stopPropagation()}
               >

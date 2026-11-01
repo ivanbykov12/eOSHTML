@@ -261,13 +261,10 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
             onClick={() => setContextMenu(null)}
           />
           <div
-            className="fixed z-[9999] liquid-glass rounded-xl py-2 min-w-[200px] shadow-2xl"
+            className="fixed z-[9999] liquid-glass-panel rounded-xl py-2 min-w-[200px]"
             style={{ 
               left: contextMenu.x, 
-              top: contextMenu.y,
-              background: 'rgba(30, 30, 30, 0.85)',
-              backdropFilter: 'blur(30px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+              top: contextMenu.y
             }}
           >
             <div 

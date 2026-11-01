@@ -254,7 +254,8 @@ export default function WindowManager({
         >
           {/* Title Bar */}
           <div
-            className="liquid-glass flex items-center h-10 px-3 cursor-default select-none shrink-0 rounded-t-xl"
+            className="liquid-glass-panel flex items-center h-10 px-3 cursor-default select-none shrink-0"
+            style={{ borderRadius: '12px 12px 0 0' }}
             onMouseDown={(e) => handleMouseDown(e, win.id)}
             onTouchStart={(e) => handleTouchStart(e, win.id)}
             onDoubleClick={() => maximizeWindow(win.id)}
