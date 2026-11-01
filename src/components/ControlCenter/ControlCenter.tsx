@@ -311,7 +311,7 @@ export default function ControlCenter({ isOpen, onClose, installedApps = [] }: C
       {/* Control Center Panel */}
       <div
         ref={containerRef}
-        className={`cc-panel ${editMode ? 'cc-edit-mode' : ''}`}
+        className={`cc-panel liquid-glass-panel ${editMode ? 'cc-edit-mode' : ''}`}
         style={{
           position: 'fixed',
           top: '44px',
@@ -319,17 +319,7 @@ export default function ControlCenter({ isOpen, onClose, installedApps = [] }: C
           width: '360px',
           maxHeight: 'calc(100vh - 80px)',
           overflowY: 'auto',
-          background: 'rgba(30, 30, 30, 0.4)',
-          backdropFilter: 'blur(50px) saturate(200%) brightness(1.1)',
-          WebkitBackdropFilter: 'blur(50px) saturate(200%) brightness(1.1)',
-          borderRadius: '40px',
           padding: '24px',
-          border: '1px solid rgba(255, 255, 255, 0.18)',
-          boxShadow: `
-            0 20px 60px rgba(0, 0, 0, 0.5),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.1)
-          `,
           color: '#f5f5f7',
           animation: 'ccOpen 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
           zIndex: 9999,

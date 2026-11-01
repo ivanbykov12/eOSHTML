@@ -94,7 +94,7 @@ export default function Dock({ apps, openAppIds, onAppClick, onLaunchpadClick, o
     <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-[8000]">
       <div
         ref={dockRef}
-        className="liquid-glass-heavy flex items-end gap-1 px-3 py-1.5 rounded-2xl"
+        className="liquid-glass-panel flex items-end gap-1 px-3 py-1.5 rounded-2xl"
         onMouseLeave={() => setHoveredIndex(null)}
         onTouchEnd={() => {
           setTouchActive(false);

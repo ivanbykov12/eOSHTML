@@ -40,11 +40,10 @@ export default function Launchpad({ apps, onAppClick, onClose }: LaunchpadProps)
 
   return (
     <div 
-      className="fixed inset-0 z-[8500] flex flex-col items-center justify-center"
+      className="fixed inset-0 z-[8500] flex flex-col items-center justify-center liquid-glass-panel"
       style={{
         background: 'rgba(0, 0, 0, 0.4)',
-        backdropFilter: 'blur(30px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+        borderRadius: 0
       }}
       onClick={onClose}
     >

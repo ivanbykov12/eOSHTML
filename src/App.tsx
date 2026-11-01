@@ -6,6 +6,7 @@ import MenuBar from './components/MenuBar/MenuBar';
 import Dock from './components/Dock/Dock';
 import MissionControl from './components/WindowManager/MissionControl';
 import Launchpad from './components/Launchpad/Launchpad';
+import LiquidGlassEffect from './components/LiquidGlass/LiquidGlassEffect';
 import { EApp, loadSystemApps } from './core/EAppParser';
 import { loadSettings, saveSettings } from './core/API';
 import './styles/liquid-glass.css';
@@ -536,6 +537,9 @@ export default function App() {
           : 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
       }}
     >
+      {/* Global Liquid Glass SVG Filters */}
+      <LiquidGlassEffect />
+      
       {/* Wallpaper */}
       <div className="absolute inset-0"
         style={{

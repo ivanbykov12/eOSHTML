@@ -239,7 +239,7 @@ export default function WindowManager({
       {windows.map(win => (
         <div
           key={win.id}
-          className={`eos-window absolute flex flex-col ${
+          className={`eos-window liquid-glass-panel absolute flex flex-col ${
             win.minimized ? 'minimized' : 'opening'
           } ${activeWindowId === win.id ? 'ring-1 ring-white/20' : ''}`}
           style={{

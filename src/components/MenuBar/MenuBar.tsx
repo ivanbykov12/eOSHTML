@@ -286,8 +286,8 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
 
   return (
     <>
-      <div className="menu-bar fixed top-0 left-0 right-0 h-7 flex items-center px-3 z-[9000] select-none"
-        style={{ fontSize: '13px' }}
+      <div className="menu-bar liquid-glass-panel fixed top-0 left-0 right-0 h-7 flex items-center px-3 z-[9000] select-none"
+        style={{ fontSize: '13px', borderRadius: 0 }}
       >
         {/* Left side */}
         <div className="flex items-center gap-3 flex-1">
