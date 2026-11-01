@@ -434,9 +434,9 @@ export default function App() {
     return () => window.removeEventListener('message', handler);
   }, [isDark, openApp, storeApps]);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts & prevent browser context menu
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'F3' || (e.ctrlKey && e.key === 'ArrowUp')) {
         e.preventDefault();
         setShowMissionControl(prev => !prev);
@@ -459,8 +459,21 @@ export default function App() {
         }
       }
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    
+    const handleContextMenu = (e: MouseEvent) => {
+      // Prevent browser context menu except on input elements
+      const target = e.target as HTMLElement;
+      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('contextmenu', handleContextMenu);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('contextmenu', handleContextMenu);
+    };
   }, [activeWindowId]);
 
   const handleOOBEComplete = useCallback((settings: any) => {

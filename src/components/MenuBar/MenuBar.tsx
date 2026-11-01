@@ -286,8 +286,13 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
 
   return (
     <>
-      <div className="menu-bar liquid-glass-panel fixed top-0 left-0 right-0 h-7 flex items-center px-3 z-[9000] select-none"
-        style={{ fontSize: '13px', borderRadius: 0 }}
+      <div className="menu-bar liquid-glass-panel fixed top-0 left-0 right-0 h-7 flex items-center px-3 select-none"
+        style={{ 
+          fontSize: '13px', 
+          borderRadius: 0,
+          zIndex: 99999,
+          pointerEvents: 'auto'
+        }}
       >
         {/* Left side */}
         <div className="flex items-center gap-3 flex-1">
@@ -317,7 +322,8 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               <div
                 className="absolute top-7 left-0 liquid-glass-panel rounded-xl py-2 min-w-[220px]"
                 style={{ 
-                  zIndex: 9999
+                  zIndex: 100000,
+                  pointerEvents: 'auto'
                 }}
                 onClick={e => e.stopPropagation()}
               >
@@ -418,7 +424,8 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               className="absolute top-7 left-0 liquid-glass-panel rounded-xl py-2 min-w-[180px]"
               style={{
                 display: 'none',
-                zIndex: 9999
+                zIndex: 100000,
+                pointerEvents: 'auto'
               }}
             >
               <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
@@ -459,7 +466,8 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               className="absolute top-7 left-0 liquid-glass-panel rounded-xl py-2 min-w-[180px]"
               style={{
                 display: 'none',
-                zIndex: 9999
+                zIndex: 100000,
+                pointerEvents: 'auto'
               }}
             >
               <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
@@ -503,7 +511,8 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               className="absolute top-7 left-0 liquid-glass-panel rounded-xl py-2 min-w-[180px]"
               style={{
                 display: 'none',
-                zIndex: 9999
+                zIndex: 100000,
+                pointerEvents: 'auto'
               }}
             >
               <div className="px-4 py-1.5 hover:bg-blue-500/20 cursor-pointer text-sm" style={{ color: 'var(--text-primary)' }}>
@@ -593,7 +602,8 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               <div
                 className="absolute top-8 right-0 liquid-glass-panel rounded-xl p-4 w-96"
                 style={{ 
-                  zIndex: 9999
+                  zIndex: 100000,
+                  pointerEvents: 'auto'
                 }}
                 onClick={e => e.stopPropagation()}
               >
@@ -692,7 +702,8 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               <div
                 className="absolute top-8 right-0 liquid-glass-panel rounded-xl p-4 w-80"
                 style={{ 
-                  zIndex: 9999
+                  zIndex: 100000,
+                  pointerEvents: 'auto'
                 }}
                 onClick={e => e.stopPropagation()}
               >

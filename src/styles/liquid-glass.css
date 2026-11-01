@@ -1,11 +1,11 @@
 /* eOS Desktop v2.0 — Liquid Glass Styles */
 
 :root {
-  /* Liquid Glass Variables */
-  --glass-blur: 30px;
-  --glass-saturate: 200%;
-  --glass-brightness: 1.15;
-  --glass-distortion-scale: 8;
+  /* Liquid Glass Variables - РЕАЛИСТИЧНЫЕ ЗНАЧЕНИЯ */
+  --glass-blur: 20px;
+  --glass-saturate: 150%;
+  --glass-brightness: 1.05;
+  --glass-distortion-scale: 3;
   --glass-border-opacity: 0.2;
   
   /* Legacy variables */
@@ -188,7 +188,8 @@ body {
   
   /* Хроматическая аберрация через pseudo-element */
   position: relative;
-  overflow: hidden;
+  /* УБРАЛ overflow: hidden - он обрезает dropdown меню! */
+  pointer-events: auto;
 }
 
 /* Хроматическая аберрация - разделение цветов по краям */
@@ -216,11 +217,16 @@ body {
   left: 0;
   right: 0;
   height: 50%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    transparent 100%
-  );
+  background: 
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      transparent 100%
+    ),
+    /* Лёгкий шум для текстуры матового стекла */
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+  opacity: 0.03;
   pointer-events: none;
   z-index: 2;
   border-radius: inherit;

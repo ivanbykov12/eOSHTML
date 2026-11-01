@@ -13,28 +13,28 @@ export default function LiquidGlassEffect() {
   return (
     <svg style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none' }}>
       <defs>
-        {/* Основной фильтр искажения - СИЛЬНЫЙ ЭФФЕКТ */}
-        <filter id="liquid-glass-distortion" x="-10%" y="-10%" width="120%" height="120%">
-          {/* Генерация шума для искажения */}
+        {/* Основной фильтр искажения - РЕАЛИСТИЧНОЕ СТЕКЛО */}
+        <filter id="liquid-glass-distortion" x="-5%" y="-5%" width="110%" height="110%">
+          {/* Генерация мелкой текстуры шума */}
           <feTurbulence
             type="fractalNoise"
-            baseFrequency="0.012"
+            baseFrequency="0.03"
             numOctaves="4"
             result="noise"
             seed="2"
           />
-          {/* Физическое искажение пикселей */}
+          {/* Лёгкое физическое искажение пикселей */}
           <feDisplacementMap
             in="SourceGraphic"
             in2="noise"
-            scale="15"
+            scale="3"
             xChannelSelector="R"
             yChannelSelector="G"
             result="displaced"
           />
-          {/* Хроматическая аберрация - разделение RGB каналов */}
-          <feOffset in="displaced" dx="1.5" dy="0" result="red-shift" />
-          <feOffset in="displaced" dx="-1.5" dy="0" result="blue-shift" />
+          {/* Лёгкая хроматическая аберрация - разделение RGB каналов */}
+          <feOffset in="displaced" dx="0.5" dy="0" result="red-shift" />
+          <feOffset in="displaced" dx="-0.5" dy="0" result="blue-shift" />
           <feColorMatrix
             in="red-shift"
             type="matrix"
@@ -56,19 +56,19 @@ export default function LiquidGlassEffect() {
           {/* Смешивание каналов */}
           <feBlend in="red-only" in2="green-only" mode="screen" result="rg" />
           <feBlend in="rg" in2="blue-only" mode="screen" result="rgb" />
-          {/* Усиление контраста */}
+          {/* Лёгкое усиление контраста */}
           <feColorMatrix
             in="rgb"
             type="matrix"
-            values="1.1 0 0 0 0  0 1.1 0 0 0  0 0 1.1 0 0  0 0 0 1 0"
+            values="1.05 0 0 0 0  0 1.05 0 0 0  0 0 1.05 0 0  0 0 0 1 0"
           />
         </filter>
 
         {/* Лёгкое искажение для тонких элементов */}
-        <filter id="liquid-glass-distortion-light" x="-5%" y="-5%" width="110%" height="110%">
+        <filter id="liquid-glass-distortion-light" x="-3%" y="-3%" width="106%" height="106%">
           <feTurbulence
             type="fractalNoise"
-            baseFrequency="0.018"
+            baseFrequency="0.035"
             numOctaves="3"
             result="noise"
             seed="5"
@@ -76,14 +76,14 @@ export default function LiquidGlassEffect() {
           <feDisplacementMap
             in="SourceGraphic"
             in2="noise"
-            scale="6"
+            scale="2"
             xChannelSelector="R"
             yChannelSelector="G"
             result="displaced"
           />
-          {/* Лёгкая хроматическая аберрация */}
-          <feOffset in="displaced" dx="0.8" dy="0" result="red-shift" />
-          <feOffset in="displaced" dx="-0.8" dy="0" result="blue-shift" />
+          {/* Очень лёгкая хроматическая аберрация */}
+          <feOffset in="displaced" dx="0.3" dy="0" result="red-shift" />
+          <feOffset in="displaced" dx="-0.3" dy="0" result="blue-shift" />
           <feColorMatrix
             in="red-shift"
             type="matrix"
@@ -107,25 +107,25 @@ export default function LiquidGlassEffect() {
         </filter>
 
         {/* Сильное искажение для акцентных элементов */}
-        <filter id="liquid-glass-distortion-strong" x="-15%" y="-15%" width="130%" height="130%">
+        <filter id="liquid-glass-distortion-strong" x="-8%" y="-8%" width="116%" height="116%">
           <feTurbulence
             type="fractalNoise"
-            baseFrequency="0.01"
-            numOctaves="5"
+            baseFrequency="0.025"
+            numOctaves="4"
             result="noise"
             seed="8"
           />
           <feDisplacementMap
             in="SourceGraphic"
             in2="noise"
-            scale="20"
+            scale="5"
             xChannelSelector="R"
             yChannelSelector="G"
             result="displaced"
           />
-          {/* Сильная хроматическая аберрация */}
-          <feOffset in="displaced" dx="2.5" dy="0" result="red-shift" />
-          <feOffset in="displaced" dx="-2.5" dy="0" result="blue-shift" />
+          {/* Умеренная хроматическая аберрация */}
+          <feOffset in="displaced" dx="1" dy="0" result="red-shift" />
+          <feOffset in="displaced" dx="-1" dy="0" result="blue-shift" />
           <feColorMatrix
             in="red-shift"
             type="matrix"
@@ -146,11 +146,11 @@ export default function LiquidGlassEffect() {
           />
           <feBlend in="red-only" in2="green-only" mode="screen" result="rg" />
           <feBlend in="rg" in2="blue-only" mode="screen" result="rgb" />
-          {/* Усиление контраста и яркости */}
+          {/* Умеренное усиление контраста */}
           <feColorMatrix
             in="rgb"
             type="matrix"
-            values="1.2 0 0 0 0.05  0 1.2 0 0 0.05  0 0 1.2 0 0.05  0 0 0 1 0"
+            values="1.1 0 0 0 0  0 1.1 0 0 0  0 0 1.1 0 0  0 0 0 1 0"
           />
         </filter>
 
