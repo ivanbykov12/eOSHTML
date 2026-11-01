@@ -1,0 +1,411 @@
+/* eOS Desktop v2.0 — Liquid Glass Styles */
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
+  --accent-color: #007aff;
+  --text-primary: #1d1d1f;
+  --text-secondary: rgba(0, 0, 0, 0.6);
+}
+
+.dark {
+  --glass-bg: rgba(30, 30, 30, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-shadow: rgba(0, 0, 0, 0.5);
+  --text-primary: #f5f5f7;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+}
+
+/* Liquid Glass Panel */
+.liquid-glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px var(--glass-shadow);
+  border-radius: 20px;
+  pointer-events: auto;
+}
+
+.liquid-glass-panel:hover {
+  box-shadow: 0 12px 40px var(--glass-shadow);
+}
+
+/* Legacy classes */
+.liquid-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px var(--glass-shadow);
+}
+
+.liquid-glass-heavy {
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 40px var(--glass-shadow);
+}
+
+/* Window Styles */
+.eos-window {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+}
+
+.eos-window.minimized {
+  transform: scale(0.1);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.eos-window.opening {
+  animation: windowOpen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes windowOpen {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Window content - solid background */
+.window-content {
+  background: rgba(30, 30, 30, 0.98);
+  color: #f5f5f7;
+}
+
+.light .window-content,
+:not(.dark) .window-content {
+  background: rgba(255, 255, 255, 0.98);
+  color: #1d1d1f;
+}
+
+/* Dock */
+.dock-item {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dock-item:hover {
+  transform: translateY(-8px) scale(1.1);
+}
+
+/* Desktop Icons */
+.desktop-icon {
+  transition: all 0.15s ease;
+}
+
+.desktop-icon:hover {
+  transform: scale(1.05);
+}
+
+.desktop-icon.selected {
+  background: rgba(0, 122, 255, 0.2);
+  border-radius: 8px;
+}
+
+.desktop-icon.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+/* Control Center */
+.control-center {
+  animation: slideDown 0.2s ease-out;
+}
+
+.cc-panel {
+  animation: ccOpen 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.cc-panel.cc-closing {
+  animation: ccClose 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@keyframes ccOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes ccClose {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+}
+
+.cc-widget {
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.cc-widget:active:not(.cc-edit-mode) {
+  transform: scale(0.92);
+}
+
+.cc-widget.cc-edit-mode {
+  animation: ccJiggle 0.5s ease-in-out infinite alternate;
+}
+
+.cc-widget.cc-dragging {
+  opacity: 0.4;
+  transform: scale(0.9);
+}
+
+.cc-widget.cc-drag-over {
+  border: 2px dashed rgba(10, 132, 255, 0.7) !important;
+  background: rgba(10, 132, 255, 0.15) !important;
+  transform: scale(1.05);
+}
+
+.cc-slider {
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.cc-slider.cc-dragging {
+  opacity: 0.4;
+  transform: scale(0.95);
+}
+
+.cc-slider.cc-drag-over {
+  border: 2px dashed rgba(10, 132, 255, 0.7) !important;
+}
+
+.cc-remove-btn {
+  animation: ccRemoveAppear 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  transition: all 0.15s ease;
+}
+
+.cc-remove-btn:hover {
+  background: rgba(150, 150, 150, 0.8) !important;
+  transform: scale(1.2);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+.cc-remove-btn:active {
+  transform: scale(0.9);
+}
+
+@keyframes ccJiggle {
+  0% { transform: rotate(-1deg) scale(1); }
+  100% { transform: rotate(1deg) scale(1.03); }
+}
+
+@keyframes ccRemoveAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mission Control */
+.mission-control {
+  animation: missionControlOpen 0.3s ease-out forwards;
+}
+
+@keyframes missionControlOpen {
+  from {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Launchpad */
+.launchpad {
+  animation: launchpadOpen 0.3s ease-out forwards;
+}
+
+@keyframes launchpadOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Menu Bar */
+.menu-bar {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .menu-bar {
+  background: rgba(30, 30, 30, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
+/* Touch-friendly styles */
+@media (hover: none) and (pointer: coarse) {
+  .dock-item {
+    min-width: 56px;
+    min-height: 56px;
+  }
+  
+  .desktop-icon {
+    min-width: 80px;
+    min-height: 80px;
+    padding: 8px;
+  }
+  
+  .dock-item:hover {
+    transform: none !important;
+  }
+  
+  .window-control-btn {
+    width: 10px !important;
+    height: 10px !important;
+    min-width: 10px !important;
+    min-height: 10px !important;
+  }
+  
+  .window-control-btn .material-icons {
+    font-size: 6px !important;
+  }
+  
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Touch mode */
+body.touch-mode {
+  --button-size: 44px;
+}
+
+body.touch-mode button:not(.window-control-btn),
+body.touch-mode .btn,
+body.touch-mode [role="button"] {
+  min-height: var(--button-size);
+  min-width: var(--button-size);
+}
+
+body.touch-mode input,
+body.touch-mode select,
+body.touch-mode textarea {
+  min-height: 40px;
+  font-size: 16px !important;
+}
+
+/* Button size variants */
+:root {
+  --base-font-size: 14px;
+  --button-size: 40px;
+}
+
+[data-button-size="small"] {
+  --button-size: 36px;
+}
+
+[data-button-size="medium"] {
+  --button-size: 40px;
+}
+
+[data-button-size="large"] {
+  --button-size: 48px;
+}
+
+button,
+.btn,
+[role="button"],
+input[type="button"],
+input[type="submit"] {
+  transition: all 0.2s ease;
+}
+
+.window-control-btn {
+  min-height: auto !important;
+  min-width: auto !important;
+}
+
+body {
+  font-size: var(--base-font-size, 14px);
+}
+
+/* Prevent text selection */
+.select-none {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Prevent pull-to-refresh */
+body {
+  overscroll-behavior: none;
+}
+
+/* Brightness overlay */
+.brightness-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  pointer-events: none;
+  z-index: 9999;
+  transition: background 0.3s ease;
+}
