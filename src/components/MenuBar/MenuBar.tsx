@@ -594,6 +594,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
                 setShowControlCenter(false);
               }}
               title="Spotlight (Cmd+Space)"
+              style={{ color: 'var(--text-primary)' }}
             >
               <Icons.spotlight />
             </button>
@@ -646,6 +647,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
                 setShowSpotlight(false);
               }}
               title="Control Center"
+              style={{ color: 'var(--text-primary)' }}
             >
               <Icons.control />
             </button>
@@ -670,6 +672,7 @@ export default function MenuBar({ activeWindowTitle, isDark, onOpenApp, installe
               toggleFullscreen();
             }}
             title={isFullscreen ? 'Выйти из полноэкранного режима' : 'Полноэкранный режим'}
+            style={{ color: 'var(--text-primary)' }}
           >
             {isFullscreen ? <Icons.fullscreenExit /> : <Icons.fullscreen />}
           </button>
