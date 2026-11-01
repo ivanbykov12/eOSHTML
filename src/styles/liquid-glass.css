@@ -1,303 +1,52 @@
 /* eOS Desktop v2.0 — Liquid Glass Styles */
 
 :root {
-  /* Liquid Glass Variables - РЕАЛИСТИЧНЫЕ ЗНАЧЕНИЯ */
-  --glass-blur: 20px;
-  --glass-saturate: 150%;
-  --glass-brightness: 1.05;
-  --glass-distortion-scale: 3;
-  --glass-border-opacity: 0.2;
-  
-  /* Legacy variables */
-  --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-shadow: rgba(0, 0, 0, 0.06);
-  --glass-highlight: rgba(255, 255, 255, 0.4);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
   --accent-color: #007aff;
   --text-primary: #1d1d1f;
   --text-secondary: rgba(0, 0, 0, 0.6);
 }
 
 .dark {
-  --glass-bg: rgba(30, 30, 30, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shadow: rgba(0, 0, 0, 0.3);
-  --glass-highlight: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(30, 30, 30, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-shadow: rgba(0, 0, 0, 0.5);
   --text-primary: #f5f5f7;
   --text-secondary: rgba(255, 255, 255, 0.6);
-  --glass-border-opacity: 0.15;
 }
 
-/* Dark theme Liquid Glass - НАСТОЯЩИЙ ЭФФЕКТ */
-.dark .liquid-glass-panel {
-  background: 
-    linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.08) 100%),
-    rgba(30, 30, 30, 0.7);
-  border: 1px solid rgba(255, 255, 255, var(--glass-border-opacity));
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
-    inset 1px 0 0 rgba(255, 255, 255, 0.1),
-    inset -1px 0 0 rgba(255, 255, 255, 0.1),
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+/* Liquid Glass Panel */
+.liquid-glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px var(--glass-shadow);
+  border-radius: 20px;
+  pointer-events: auto;
 }
 
-.dark .liquid-glass-panel:hover {
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
-    inset 1px 0 0 rgba(255, 255, 255, 0.15),
-    inset -1px 0 0 rgba(255, 255, 255, 0.15),
-    0 25px 70px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.08);
+.liquid-glass-panel:hover {
+  box-shadow: 0 12px 40px var(--glass-shadow);
 }
 
-/* Усиление хроматической аберрации в dark mode */
-.dark .liquid-glass-panel::before {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 0, 0, 0.05) 0%,
-    transparent 50%,
-    rgba(0, 100, 255, 0.05) 100%
-  );
-}
-
-/* Control Center виджеты с Liquid Glass - УСИЛЕННЫЙ ЭФФЕКТ */
-.cc-widget.liquid-glass-panel {
-  border-radius: 50%;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: url(#liquid-glass-distortion-strong);
-}
-
-.cc-widget.liquid-glass-panel:active {
-  transform: scale(0.92);
-}
-
-/* Активные виджеты с особым эффектом */
-.cc-widget.liquid-glass-panel[style*="background: linear-gradient"] {
-  filter: url(#liquid-glass-distortion-strong) brightness(1.2);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
-    0 8px 24px rgba(10, 132, 255, 0.4);
-}
-
-/* Dock иконки с Liquid Glass */
-.dock-icon.liquid-glass-panel {
-  border-radius: 12px;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: url(#liquid-glass-distortion);
-}
-
-.dock-icon.liquid-glass-panel:hover {
-  transform: translateY(-8px) scale(1.1);
-  filter: url(#liquid-glass-distortion) brightness(1.1);
-}
-
-/* Окна приложений с усиленным эффектом */
-.eos-window.liquid-glass-panel {
-  filter: url(#liquid-glass-distortion);
-}
-
-.eos-window.liquid-glass-panel:hover {
-  filter: url(#liquid-glass-distortion) brightness(1.02);
-}
-
-/* Menu Bar с особым эффектом */
-.menu-bar.liquid-glass-panel {
-  filter: url(#liquid-glass-distortion-light);
-  border-radius: 0;
-}
-
-/* Модальные окна и dropdown меню */
-.liquid-glass-panel[style*="position: absolute"] {
-  filter: url(#liquid-glass-distortion);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  color: var(--text-primary);
-}
-
-/* Liquid Glass Base */
+/* Legacy classes */
 .liquid-glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-border);
-  box-shadow: 
-    0 4px 24px var(--glass-shadow),
-    inset 0 1px 0 var(--glass-highlight);
+  box-shadow: 0 8px 32px var(--glass-shadow);
 }
 
 .liquid-glass-heavy {
   background: var(--glass-bg);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
   border: 1px solid var(--glass-border);
-  box-shadow: 
-    0 8px 40px var(--glass-shadow),
-    inset 0 1px 0 var(--glass-highlight);
-}
-
-/* iOS 26 / macOS Tahoe Liquid Glass - НАСТОЯЩИЙ ЭФФЕКТ */
-.liquid-glass-panel {
-  /* Физическое искажение через SVG displacement map */
-  filter: url(#liquid-glass-distortion);
-  
-  /* Многослойный фон с градиентом */
-  background: 
-    linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 100%),
-    rgba(255, 255, 255, 0.1);
-  
-  /* Размытие + насыщенность + яркость */
-  backdrop-filter: 
-    blur(var(--glass-blur)) 
-    saturate(var(--glass-saturate)) 
-    brightness(var(--glass-brightness))
-    contrast(1.1);
-  -webkit-backdrop-filter: 
-    blur(var(--glass-blur)) 
-    saturate(var(--glass-saturate)) 
-    brightness(var(--glass-brightness))
-    contrast(1.1);
-  
-  /* Граница с эффектом преломления света */
-  border: 1px solid rgba(255, 255, 255, var(--glass-border-opacity));
-  
-  /* Specular highlights - отражения света */
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
-    inset 1px 0 0 rgba(255, 255, 255, 0.2),
-    inset -1px 0 0 rgba(255, 255, 255, 0.2),
-    0 20px 60px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
-  
-  border-radius: 20px;
-  will-change: filter, backdrop-filter;
-  
-  /* Хроматическая аберрация через pseudo-element */
-  position: relative;
-  /* УБРАЛ overflow: hidden - он обрезает dropdown меню! */
-  pointer-events: auto;
-}
-
-/* Хроматическая аберрация - разделение цветов по краям */
-.liquid-glass-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 0, 0, 0.03) 0%,
-    transparent 50%,
-    rgba(0, 0, 255, 0.03) 100%
-  );
-  mix-blend-mode: screen;
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
-
-/* Блик сверху для эффекта стекла */
-.liquid-glass-panel::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: 
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.15) 0%,
-      transparent 100%
-    ),
-    /* Лёгкий шум для текстуры матового стекла */
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  background-blend-mode: overlay;
-  opacity: 0.03;
-  pointer-events: none;
-  z-index: 2;
-  border-radius: inherit;
-}
-
-/* Хроматическая аберрация */
-.glass-chromatic {
-  position: relative;
-}
-
-.glass-chromatic::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: inherit;
-  filter: url(#liquid-glass-distortion);
-  mix-blend-mode: screen;
-  opacity: 0.3;
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-/* SVG фильтрация для физического искажения */
-.glass-distortion {
-  filter: url(#liquid-glass-distortion);
-}
-
-.glass-distortion-light {
-  filter: url(#liquid-glass-distortion-light);
-}
-
-.glass-distortion-strong {
-  filter: url(#liquid-glass-distortion-strong);
-}
-
-.glass-full-effect {
-  filter: url(#liquid-glass-full);
-}
-
-/* Оптимизация производительности */
-.liquid-glass-panel,
-.glass-distortion,
-.glass-distortion-light,
-.glass-distortion-strong,
-.glass-full-effect {
-  will-change: filter, backdrop-filter;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-/* Плавные переходы для стеклянных элементов */
-.liquid-glass-panel {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Hover эффект для интерактивных стеклянных элементов */
-.liquid-glass-panel:hover {
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
-    0 25px 70px rgba(0, 0, 0, 0.25);
-}
-
-/* Fallback для браузеров без поддержки SVG фильтров */
-@supports not (filter: url(#liquid-glass-distortion)) {
-  .glass-distortion,
-  .glass-distortion-light,
-  .glass-distortion-strong,
-  .glass-full-effect {
-    filter: none;
-  }
+  box-shadow: 0 12px 40px var(--glass-shadow);
 }
 
 /* Window Styles */
@@ -318,18 +67,6 @@ body {
   animation: windowOpen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Window content - SOLID opaque background for readability */
-.window-content {
-  background: rgba(30, 30, 30, 0.98);
-  color: #f5f5f7;
-}
-
-.light .window-content,
-:not(.dark) .window-content {
-  background: rgba(255, 255, 255, 0.98);
-  color: #1d1d1f;
-}
-
 @keyframes windowOpen {
   from {
     transform: scale(0.8);
@@ -341,49 +78,63 @@ body {
   }
 }
 
-@keyframes windowClose {
-  from {
-    transform: scale(1);
-    opacity: 1;
-  }
-  to {
-    transform: scale(0.8);
-    opacity: 0;
-  }
+/* Window content - solid background */
+.window-content {
+  background: rgba(30, 30, 30, 0.98);
+  color: #f5f5f7;
 }
 
-/* Dock Magnification */
+.light .window-content,
+:not(.dark) .window-content {
+  background: rgba(255, 255, 255, 0.98);
+  color: #1d1d1f;
+}
+
+/* Dock */
 .dock-item {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dock-item:hover {
-  transform: translateY(-12px) scale(1.3);
+  transform: translateY(-8px) scale(1.1);
 }
 
-.dock-item:hover + .dock-item,
-.dock-item:has(+ .dock-item:hover) {
-  transform: translateY(-4px) scale(1.1);
+/* Desktop Icons */
+.desktop-icon {
+  transition: all 0.15s ease;
 }
 
-/* Menu Bar */
-.menu-bar {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+.desktop-icon:hover {
+  transform: scale(1.05);
 }
 
-.dark .menu-bar {
-  background: rgba(30, 30, 30, 0.75);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+.desktop-icon.selected {
+  background: rgba(0, 122, 255, 0.2);
+  border-radius: 8px;
 }
 
-/* Control Center - iPadOS 26 / macOS Tahoe Liquid Glass Style */
+.desktop-icon.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+/* Control Center */
+.control-center {
+  animation: slideDown 0.2s ease-out;
+}
+
+.cc-panel {
+  animation: ccOpen 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.cc-panel.cc-closing {
+  animation: ccClose 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
 @keyframes ccOpen {
   from {
     opacity: 0;
-    transform: scale(0.92) translateY(-12px);
+    transform: scale(0.95) translateY(-10px);
   }
   to {
     opacity: 1;
@@ -398,17 +149,16 @@ body {
   }
   to {
     opacity: 0;
-    transform: scale(0.92) translateY(-12px);
+    transform: scale(0.95) translateY(-10px);
   }
 }
 
-/* Widget animations - iPadOS 26 style */
 .cc-widget {
-  transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .cc-widget:active:not(.cc-edit-mode) {
-  transform: scale(0.88);
+  transform: scale(0.92);
 }
 
 .cc-widget.cc-edit-mode {
@@ -416,8 +166,8 @@ body {
 }
 
 .cc-widget.cc-dragging {
-  opacity: 0.35;
-  transform: scale(0.85);
+  opacity: 0.4;
+  transform: scale(0.9);
 }
 
 .cc-widget.cc-drag-over {
@@ -426,103 +176,22 @@ body {
   transform: scale(1.05);
 }
 
-/* Size selector in edit mode */
-.cc-widget .size-selector {
-  position: absolute;
-  bottom: -8px;
-  right: -8px;
-  display: flex;
-  gap: 2px;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 8px;
-  padding: 2px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  z-index: 10;
-}
-
-.cc-widget .size-btn {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 9px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-}
-
-.cc-widget .size-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.cc-widget .size-btn.active {
-  background: #0A84FF;
-}
-
-/* Widget size variants */
-.cc-widget[data-size="1x1"] {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-}
-
-.cc-widget[data-size="1x2"] {
-  width: 156px;
-  height: 70px;
-  border-radius: 35px;
-}
-
-.cc-widget[data-size="2x1"] {
-  width: 156px;
-  height: 70px;
-  border-radius: 35px;
-}
-
-.cc-widget[data-size="2x2"] {
-  width: 156px;
-  height: 156px;
-  border-radius: 40px;
-}
-
-/* Grid span classes */
-.cc-widget[data-size="1x1"] {
-  grid-column: span 1;
-}
-
-.cc-widget[data-size="1x2"],
-.cc-widget[data-size="2x1"] {
-  grid-column: span 2;
-}
-
-.cc-widget[data-size="2x2"] {
-  grid-column: span 4;
-}
-
-/* Slider animations - Liquid Glass style */
 .cc-slider {
-  transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .cc-slider.cc-dragging {
-  opacity: 0.35;
+  opacity: 0.4;
   transform: scale(0.95);
 }
 
 .cc-slider.cc-drag-over {
   border: 2px dashed rgba(10, 132, 255, 0.7) !important;
-  transform: scale(1.02);
 }
 
-/* Remove button - macOS style (gray, not red) */
 .cc-remove-btn {
-  animation: ccRemoveAppear 0.25s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-  transition: all 0.2s ease;
+  animation: ccRemoveAppear 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  transition: all 0.15s ease;
 }
 
 .cc-remove-btn:hover {
@@ -551,41 +220,10 @@ body {
   }
 }
 
-/* Liquid Glass Panel - Enhanced depth */
-.cc-panel {
-  transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-.cc-panel:hover {
-  box-shadow: 
-    0 24px 70px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-}
-
-/* Scrollbar styling for Control Center */
-.cc-panel::-webkit-scrollbar {
-  width: 6px;
-}
-
-.cc-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.cc-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
-
-.cc-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* OOBE Animations */
-@keyframes fadeInUp {
+@keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
@@ -593,49 +231,49 @@ body {
   }
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
+/* Mission Control */
+.mission-control {
+  animation: missionControlOpen 0.3s ease-out forwards;
 }
 
-@keyframes logoFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+@keyframes missionControlOpen {
+  from {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out forwards;
+/* Launchpad */
+.launchpad {
+  animation: launchpadOpen 0.3s ease-out forwards;
 }
 
-.animate-pulse-slow {
-  animation: pulse 3s ease-in-out infinite;
+@keyframes launchpadOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.animate-logo-float {
-  animation: logoFloat 4s ease-in-out infinite;
+/* Menu Bar */
+.menu-bar {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Desktop Icons */
-.desktop-icon {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
-}
-
-.desktop-icon:hover {
-  transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.desktop-icon.selected {
-  background: rgba(0, 122, 255, 0.2);
-}
-
-.desktop-icon[draggable="true"] {
-  cursor: grab;
-}
-
-.desktop-icon[draggable="true"]:active {
-  cursor: grabbing;
+.dark .menu-bar {
+  background: rgba(30, 30, 30, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Scrollbar Styles */
@@ -657,43 +295,46 @@ body {
   background: rgba(128, 128, 128, 0.5);
 }
 
-/* Unified button sizes for all devices */
-:root {
-  --base-font-size: 14px;
-  --button-size: 40px;
+/* Touch-friendly styles */
+@media (hover: none) and (pointer: coarse) {
+  .dock-item {
+    min-width: 56px;
+    min-height: 56px;
+  }
+  
+  .desktop-icon {
+    min-width: 80px;
+    min-height: 80px;
+    padding: 8px;
+  }
+  
+  .dock-item:hover {
+    transform: none !important;
+  }
+  
+  .window-control-btn {
+    width: 10px !important;
+    height: 10px !important;
+    min-width: 10px !important;
+    min-height: 10px !important;
+  }
+  
+  .window-control-btn .material-icons {
+    font-size: 6px !important;
+  }
+  
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
-/* Button size variants */
-[data-button-size="small"] {
-  --button-size: 36px;
-}
-
-[data-button-size="medium"] {
-  --button-size: 40px;
-}
-
-[data-button-size="large"] {
-  --button-size: 48px;
-}
-
-/* Apply button size to all interactive elements */
-button,
-.btn,
-[role="button"],
-input[type="button"],
-input[type="submit"] {
-  transition: all 0.2s ease;
-}
-
-/* Window control buttons should not have min-size */
-.window-control-btn {
-  min-height: auto !important;
-  min-width: auto !important;
-}
-
-/* Touch mode - manually enabled for larger touch targets */
+/* Touch mode */
 body.touch-mode {
-  --button-size: 40px;
+  --button-size: 44px;
 }
 
 body.touch-mode button:not(.window-control-btn),
@@ -710,22 +351,42 @@ body.touch-mode textarea {
   font-size: 16px !important;
 }
 
-/* Font size */
+/* Button size variants */
+:root {
+  --base-font-size: 14px;
+  --button-size: 40px;
+}
+
+[data-button-size="small"] {
+  --button-size: 36px;
+}
+
+[data-button-size="medium"] {
+  --button-size: 40px;
+}
+
+[data-button-size="large"] {
+  --button-size: 48px;
+}
+
+button,
+.btn,
+[role="button"],
+input[type="button"],
+input[type="submit"] {
+  transition: all 0.2s ease;
+}
+
+.window-control-btn {
+  min-height: auto !important;
+  min-width: auto !important;
+}
+
 body {
-  font-size: var(--base-font-size);
+  font-size: var(--base-font-size, 14px);
 }
 
-/* Smoother touch scrolling for all devices */
-* {
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Prevent zoom on input focus */
-input, select, textarea {
-  font-size: 16px;
-}
-
-/* Prevent text selection on touch */
+/* Prevent text selection */
 .select-none {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -734,38 +395,9 @@ input, select, textarea {
   -webkit-touch-callout: none;
 }
 
-/* Prevent pull-to-refresh on mobile */
+/* Prevent pull-to-refresh */
 body {
   overscroll-behavior: none;
-}
-
-/* Mission Control */
-@keyframes missionControlOpen {
-  from {
-    opacity: 0;
-    transform: scale(1.2);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.mission-control {
-  animation: missionControlOpen 0.3s ease-out forwards;
-}
-
-/* Tab styles */
-.window-tab {
-  transition: all 0.2s ease;
-}
-
-.window-tab.active {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.dark .window-tab.active {
-  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Brightness overlay */
