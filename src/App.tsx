@@ -1,14 +1,62 @@
-import { useState, useEffect, useCallback } from 'react';
-import OOBE from './components/OOBE/OOBE';
-import Desktop from './components/Desktop/Desktop';
-import WindowManager, { WindowState } from './components/WindowManager/WindowManager';
-import MenuBar from './components/MenuBar/MenuBar';
-import Dock from './components/Dock/Dock';
-import MissionControl from './components/WindowManager/MissionControl';
-import Launchpad from './components/Launchpad/Launchpad';
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import { WindowState } from './components/WindowManager/WindowManager';
 import { EApp, loadSystemApps } from './core/EAppParser';
 import { loadSettings, saveSettings } from './core/API';
+import WarningModal from './components/WarningModal';
 import './styles/liquid-glass.css';
+
+// Компонент-заглушка для отсутствующих компонентов
+const MissingComponent = () => null;
+
+// Ленивая загрузка компонентов с обработкой ошибок
+const OOBE = lazy(() => 
+  import('./components/OOBE/OOBE').catch(() => {
+    console.warn('OOBE component failed to load');
+    return { default: MissingComponent as any };
+  })
+);
+
+const Desktop = lazy(() => 
+  import('./components/Desktop/Desktop').catch(() => {
+    console.warn('Desktop component failed to load');
+    return { default: MissingComponent as any };
+  })
+);
+
+const WindowManager = lazy(() => 
+  import('./components/WindowManager/WindowManager').catch(() => {
+    console.warn('WindowManager component failed to load');
+    return { default: MissingComponent as any };
+  })
+);
+
+const MenuBar = lazy(() => 
+  import('./components/MenuBar/MenuBar').catch(() => {
+    console.warn('MenuBar component failed to load');
+    return { default: MissingComponent as any };
+  })
+);
+
+const Dock = lazy(() => 
+  import('./components/Dock/Dock').catch(() => {
+    console.warn('Dock component failed to load');
+    return { default: MissingComponent as any };
+  })
+);
+
+const MissionControl = lazy(() => 
+  import('./components/WindowManager/MissionControl').catch(() => {
+    console.warn('MissionControl component failed to load');
+    return { default: MissingComponent as any };
+  })
+);
+
+const Launchpad = lazy(() => 
+  import('./components/Launchpad/Launchpad').catch(() => {
+    console.warn('Launchpad component failed to load');
+    return { default: MissingComponent as any };
+  })
+);
 
 interface InstalledApp {
   id: string;
@@ -32,6 +80,12 @@ export default function App() {
   const [wallpaper, setWallpaper] = useState('https://image.qwenlm.ai/generated-images/5e8ac870-af53-4f3f-a451-4014bb9cce09/_result.png');
   const [dockSize, setDockSize] = useState(48);
   const [systemAppsLoaded, setSystemAppsLoaded] = useState(false);
+  const [warning, setWarning] = useState<{ show: boolean; title: string; message: string }>({
+    show: false,
+    title: '',
+    message: ''
+  });
+  const [failedComponents, setFailedComponents] = useState<Set<string>>(new Set());
 
   const handleDockReorder = (fromIndex: number, toIndex: number) => {
     setInstalledApps(prev => {
@@ -149,6 +203,12 @@ export default function App() {
     const appData = installedApps.find(a => a.id === appId);
     if (!appData?.app && !appName) return;
 
+    // Проверяем, не был ли компонент WindowManager удалён
+    if (failedComponents.has('WindowManager')) {
+      showComponentWarning('WindowManager');
+      return;
+    }
+
     const windowId = `win_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
     const maxZ = Math.max(...windows.map(w => w.zIndex), 0);
 
@@ -174,7 +234,7 @@ export default function App() {
 
     setWindows(prev => [...prev, newWindow]);
     setActiveWindowId(windowId);
-  }, [windows, installedApps]);
+  }, [windows, installedApps, failedComponents]);
 
   // Listen for settings changes from apps (via postMessage from iframes)
   useEffect(() => {
@@ -488,6 +548,12 @@ export default function App() {
   }, []);
 
   const handleDockClick = useCallback((appId: string) => {
+    // Проверяем, не был ли компонент удалён
+    if (failedComponents.has('WindowManager')) {
+      showComponentWarning('WindowManager');
+      return;
+    }
+
     const existing = windows.find(w => w.appId === appId);
     if (existing) {
       const maxZ = Math.max(...windows.map(w => w.zIndex), 0);
@@ -498,7 +564,7 @@ export default function App() {
     } else {
       openApp(appId);
     }
-  }, [windows, openApp]);
+  }, [windows, openApp, failedComponents]);
 
   const handleMissionControlSelect = useCallback((windowId: string) => {
     const maxZ = Math.max(...windows.map(w => w.zIndex), 0);
@@ -521,9 +587,23 @@ export default function App() {
 
   const openAppIds = windows.map(w => w.appId);
 
+  // Функция для показа предупреждения о недостающем компоненте
+  const showComponentWarning = (componentName: string) => {
+    setFailedComponents(prev => new Set(prev).add(componentName));
+    setWarning({
+      show: true,
+      title: 'Компонент недоступен',
+      message: `Компонент "${componentName}" не может быть загружен. Возможно, файл был удалён или повреждён. Некоторые функции могут быть недоступны.`
+    });
+  };
+
   // OOBE Screen
   if (!setupComplete) {
-    return <OOBE onComplete={handleOOBEComplete} />;
+    return (
+      <Suspense fallback={<div className="fixed inset-0 bg-black" />}>
+        <OOBE onComplete={handleOOBEComplete} />
+      </Suspense>
+    );
   }
 
   // Loading state while system apps are loading
@@ -542,88 +622,98 @@ export default function App() {
 
   // Main Desktop
   return (
-    <div className="fixed inset-0 overflow-hidden select-none"
-      style={{
-        background: isDark
-          ? 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)'
-          : 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-      }}
-    >
-      {/* Wallpaper */}
-      <div className="absolute inset-0"
+    <Suspense fallback={<div className="fixed inset-0 bg-black" />}>
+      <div className="fixed inset-0 overflow-hidden select-none"
         style={{
-          backgroundImage: `url(${wallpaper})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          opacity: isDark ? 0.8 : 0.6,
+          background: isDark
+            ? 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)'
+            : 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
         }}
-      />
-      {/* Wallpaper overlay for depth */}
-      <div className="absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse at 30% 20%, rgba(120, 80, 255, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(255, 100, 200, 0.1) 0%, transparent 50%)',
-        }}
-      />
+      >
+        {/* Wallpaper */}
+        <div className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${wallpaper})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: isDark ? 0.8 : 0.6,
+          }}
+        />
+        {/* Wallpaper overlay for depth */}
+        <div className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at 30% 20%, rgba(120, 80, 255, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(255, 100, 200, 0.1) 0%, transparent 50%)',
+          }}
+        />
 
-      {/* Brightness overlay */}
-      <div
-        className="brightness-overlay"
-        style={{ background: `rgba(0,0,0,${(100 - brightness) / 200})` }}
-      />
+        {/* Brightness overlay */}
+        <div
+          className="brightness-overlay"
+          style={{ background: `rgba(0,0,0,${(100 - brightness) / 200})` }}
+        />
 
-      {/* Menu Bar - hidden in Launchpad */}
-      {!showLaunchpad && (
-        <MenuBar 
-          activeWindowTitle={activeWindowTitle} 
-          isDark={isDark} 
+        {/* Menu Bar - hidden in Launchpad */}
+        {!showLaunchpad && (
+          <MenuBar 
+            activeWindowTitle={activeWindowTitle} 
+            isDark={isDark} 
+            onOpenApp={openApp}
+            installedApps={installedApps}
+          />
+        )}
+
+        {/* Desktop */}
+        <Desktop
           onOpenApp={openApp}
-          installedApps={installedApps}
+          installedApps={dockApps}
         />
-      )}
 
-      {/* Desktop */}
-      <Desktop
-        onOpenApp={openApp}
-        installedApps={dockApps}
-      />
-
-      {/* Window Manager */}
-      <WindowManager
-        windows={windows}
-        setWindows={setWindows}
-        activeWindowId={activeWindowId}
-        setActiveWindowId={setActiveWindowId}
-        currentModel="eosdesktop"
-      />
-
-      {/* Mission Control */}
-      {showMissionControl && (
-        <MissionControl
+        {/* Window Manager */}
+        <WindowManager
           windows={windows}
-          onSelectWindow={handleMissionControlSelect}
-          onClose={() => setShowMissionControl(false)}
+          setWindows={setWindows}
+          activeWindowId={activeWindowId}
+          setActiveWindowId={setActiveWindowId}
+          currentModel="eosdesktop"
         />
-      )}
 
-      {/* Launchpad */}
-      {showLaunchpad && (
-        <Launchpad
+        {/* Mission Control */}
+        {showMissionControl && (
+          <MissionControl
+            windows={windows}
+            onSelectWindow={handleMissionControlSelect}
+            onClose={() => setShowMissionControl(false)}
+          />
+        )}
+
+        {/* Launchpad */}
+        {showLaunchpad && (
+          <Launchpad
+            apps={dockApps}
+            onAppClick={handleDockClick}
+            onClose={() => setShowLaunchpad(false)}
+          />
+        )}
+
+        {/* Dock */}
+        <Dock
           apps={dockApps}
+          openAppIds={openAppIds}
           onAppClick={handleDockClick}
-          onClose={() => setShowLaunchpad(false)}
+          onLaunchpadClick={() => setShowLaunchpad(true)}
+          onReorder={handleDockReorder}
+          onRemoveFromDock={handleRemoveFromDock}
+          dockSize={dockSize}
         />
-      )}
 
-      {/* Dock */}
-      <Dock
-        apps={dockApps}
-        openAppIds={openAppIds}
-        onAppClick={handleDockClick}
-        onLaunchpadClick={() => setShowLaunchpad(true)}
-        onReorder={handleDockReorder}
-        onRemoveFromDock={handleRemoveFromDock}
-        dockSize={dockSize}
-      />
-    </div>
+        {/* Warning Modal */}
+        <WarningModal
+          isOpen={warning.show}
+          onClose={() => setWarning({ show: false, title: '', message: '' })}
+          title={warning.title}
+          message={warning.message}
+        />
+      </div>
+    </Suspense>
   );
 }
